@@ -11,10 +11,8 @@ import {
     Thead,
     Tr
 } from "@chakra-ui/react";
-import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
 
-var DOMParser = require('xmldom').DOMParser;
 const cheerio = require('cheerio');
 
 export default function CurrentPortfolio({ holdings }) {
@@ -30,7 +28,7 @@ export default function CurrentPortfolio({ holdings }) {
                 <TableContainer>
                     <Table variant='striped' colorScheme='gray' size='lg' >
                         <TableCaption>
-                            <Text fontSize='2xl' fontWeight='bold' color='gray.500'>
+                            <Text fontSize='2xl' fontWeight='bold' color='blue.500'>
                                 Current Portfolio
                             </Text>
                         </TableCaption>
@@ -41,6 +39,7 @@ export default function CurrentPortfolio({ holdings }) {
                                 <Th>Buy Price</Th>
                                 <Th>Current Price</Th>
                                 <Th>Profit N Loss</Th>
+                                <Th>Percent P&L</Th>
                             </Tr>
                         </Thead>  
                         <Tbody>
@@ -55,6 +54,12 @@ export default function CurrentPortfolio({ holdings }) {
                                         fontWeight={"bold"}
                                     >
                                         {holding.pnl}
+                                    </Td>
+                                    <Td 
+                                        color={holding.pnl_percentage >= 0 ? "green" : "red"}
+                                        fontWeight={"bold"}
+                                    >
+                                        {holding.pnl_percentage} %
                                     </Td>
                                 </Tr>
                             ))}   
@@ -77,6 +82,8 @@ export async function getStaticProps() {
             .find({})
             .toArray();
 
+        let total_pnl = 0;
+        let total_amount_invested = 0;
         for (let i = 0; i < holdings.length; i++) 
         {
             let buy_price = holdings[i].buy_price;
@@ -89,8 +96,22 @@ export async function getStaticProps() {
 
             holdings[i].amount_invested = qty * buy_price;
             holdings[i].pnl = parseFloat(parseFloat((current_price - buy_price)*qty).toFixed(2));
+            holdings[i].pnl_percentage = parseFloat(parseFloat((holdings[i].pnl / holdings[i].amount_invested)*100).toFixed(2));
+
+            total_pnl += holdings[i].pnl;
+            total_amount_invested += holdings[i].amount_invested;
         }
 
+        holdings.sort((a, b) => (b.pnl_percentage > a.pnl_percentage) ? 1 : -1);
+
+        holdings.push({
+            ticker: "Total",
+            quantity: "",
+            buy_price: "",
+            CMP: "",
+            pnl: parseFloat(total_pnl.toFixed(2)),
+            pnl_percentage: parseFloat(parseFloat((total_pnl / total_amount_invested)*100).toFixed(2))
+        });
         console.log(holdings);
     
         return {
