@@ -15,7 +15,7 @@ import { Helmet } from "react-helmet";
 
 const cheerio = require('cheerio');
 
-export default function CurrentPortfolio({ holdings }) {
+export default function CurrentPortfolio({ holdings, total_amount_invested }) {
     
     return (
         <>
@@ -35,20 +35,18 @@ export default function CurrentPortfolio({ holdings }) {
                         <Thead>
                             <Tr>
                                 <Th>Ticker</Th>
+                                <Th>Profit N Loss</Th>
+                                <Th>Percent P&L</Th>
+                                <Th>% Amount Invested</Th>
                                 <Th>Quantity</Th>
                                 <Th>Buy Price</Th>
                                 <Th>Current Price</Th>
-                                <Th>Profit N Loss</Th>
-                                <Th>Percent P&L</Th>
                             </Tr>
                         </Thead>  
                         <Tbody>
                             {holdings.map((holding) => (
                                 <Tr>
-                                    <Td>{holding.ticker}</Td>
-                                    <Td>{holding.quantity}</Td>
-                                    <Td>{holding.buy_price}</Td>
-                                    <Td>{holding.CMP}</Td>
+                                    <Td fontWeight={holding.ticker === "Total($)" ? "bold" : ""}>{holding.ticker}</Td>
                                     <Td 
                                         color={holding.pnl >= 0 ? "green" : "red"}
                                         fontWeight={"bold"}
@@ -61,6 +59,11 @@ export default function CurrentPortfolio({ holdings }) {
                                     >
                                         {holding.pnl_percentage} %
                                     </Td>
+                                    <Td>{parseFloat(100*holding.amount_invested/total_amount_invested).toFixed(2)}</Td>
+                                    <Td>{holding.quantity}</Td>
+                                    <Td>{holding.buy_price}</Td>
+                                    <Td>{holding.CMP}</Td>
+                                    
                                 </Tr>
                             ))}   
                         </Tbody>
@@ -82,8 +85,20 @@ export async function getStaticProps() {
             .find({})
             .toArray();
 
+        const closed_positions = await database
+            .collection('Closed Positions')
+            .find({})
+            .toArray();
+        //console.log(closed_positions);
+
         let total_pnl = 0;
         let total_amount_invested = 0;
+        for (let i = 0; i < closed_positions.length; i++) 
+        {
+            let diff = closed_positions[i].close_price - closed_positions[i].buy_price;
+            total_pnl += parseFloat(parseFloat(diff*closed_positions[i].quantity).toFixed(2));
+        }
+
         for (let i = 0; i < holdings.length; i++) 
         {
             let buy_price = holdings[i].buy_price;
@@ -104,18 +119,26 @@ export async function getStaticProps() {
 
         holdings.sort((a, b) => (b.pnl_percentage > a.pnl_percentage) ? 1 : -1);
 
-        holdings.push({
+        let usd_inr_exchange_rate = await scraperWeb("INR=X");
+        /*holdings.push({
             ticker: "Total",
             quantity: "",
             buy_price: "",
             CMP: "",
-            pnl: parseFloat(total_pnl.toFixed(2)),
-            pnl_percentage: parseFloat(parseFloat((total_pnl / total_amount_invested)*100).toFixed(2))
+            pnl_percentage: parseFloat(parseFloat((total_pnl / total_amount_invested)*100).toFixed(2)),
+            pnl: total_pnl
+        });*/
+        holdings.push({
+            ticker: "Total($)",
+            quantity: "",
+            buy_price: "",
+            CMP: "",
+            pnl_percentage: parseFloat(parseFloat((total_pnl / total_amount_invested)*100).toFixed(2)),
+            pnl: parseFloat(total_pnl/usd_inr_exchange_rate).toFixed(2),
         });
-        console.log(holdings);
     
         return {
-            props: { holdings: JSON.parse(JSON.stringify(holdings)) },
+            props: { holdings: JSON.parse(JSON.stringify(holdings)), total_amount_invested: total_amount_invested },
         };
     } catch (e) {
         console.error(e);
