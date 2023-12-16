@@ -1,21 +1,26 @@
 import clientPromise from "../lib/mongodb";
 import {
     Container, 
+    VStack, 
+    Heading, 
     Table, 
-    TableCaption, 
     TableContainer, 
     Tbody, 
     Td, 
-    Text, 
     Th, 
     Thead,
-    Tr
+    Tr,
+    Text,
+    HStack
 } from "@chakra-ui/react";
 import { Helmet } from "react-helmet";
 
 const cheerio = require('cheerio');
 
-export default function CurrentPortfolio({ holdings, total_amount_invested }) {
+export default function CurrentPortfolio({ 
+    holdings, 
+    total_amount_invested,
+    indices }) {
     
     return (
         <>
@@ -24,29 +29,42 @@ export default function CurrentPortfolio({ holdings, total_amount_invested }) {
             </Helmet>
 
             <Container maxW='container.xl' centerContent>
+
+                <VStack spacing={3} mb={8}>
+
+                    <Heading as='h5' size='lg' fontWeight='bold' color='black.500'>
+                        Current Portfolio
+                    </Heading>
+
+                    <HStack spacing={6}>
+                        {indices.map((index) => (
+                            <Text color='green.500'>
+                                <b>{index.name}</b> - {index.price}
+                            </Text>
+                        ))}
+                    </HStack>
+                    
+                </VStack>
                 
                 <TableContainer>
                     <Table variant='striped' colorScheme='gray' size='lg' >
-                        <TableCaption>
-                            <Text fontSize='2xl' fontWeight='bold' color='blue.500'>
-                                Current Portfolio
-                            </Text>
-                        </TableCaption>
                         <Thead>
                             <Tr>
                                 <Th>Ticker</Th>
                                 <Th>Profit N Loss</Th>
-                                <Th>Percent P&L</Th>
-                                <Th>% Amount Invested</Th>
-                                <Th>Quantity</Th>
+                                <Th>% P&L</Th>
+                                <Th>% Invested</Th>
+                                <Th>QTY</Th>
                                 <Th>Buy Price</Th>
-                                <Th>Current Price</Th>
+                                <Th>CMP</Th>
                             </Tr>
                         </Thead>  
                         <Tbody>
                             {holdings.map((holding) => (
                                 <Tr>
-                                    <Td fontWeight={holding.ticker === "Total($)" ? "bold" : ""}>{holding.ticker}</Td>
+                                    <Td fontWeight={holding.ticker === "Total($)" ? "bold" : ""}>
+                                        {holding.ticker.toUpperCase()}
+                                    </Td>
                                     <Td 
                                         color={holding.pnl >= 0 ? "green" : "red"}
                                         fontWeight={"bold"}
@@ -137,8 +155,20 @@ export async function getStaticProps() {
             pnl: parseFloat(total_pnl/usd_inr_exchange_rate).toFixed(2),
         });
     
+        let indices = [];
+        const nifty_50 = await scraperWeb("^NSEI");
+        const bank_nifty = await scraperWeb("^NSEBANK");
+        indices.push({ 'name': 'Nifty 50', 'price': nifty_50});
+        indices.push({ 'name': 'Bank Nifty', 'price': bank_nifty});
+
+        console.log(indices);
+        
         return {
-            props: { holdings: JSON.parse(JSON.stringify(holdings)), total_amount_invested: total_amount_invested },
+            props: { 
+                holdings: JSON.parse(JSON.stringify(holdings)), 
+                total_amount_invested: total_amount_invested, 
+                indices: JSON.parse(JSON.stringify(indices))
+            },
         };
     } catch (e) {
         console.error(e);
