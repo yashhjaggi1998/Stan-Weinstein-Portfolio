@@ -20,7 +20,7 @@ const cheerio = require('cheerio');
 export default function CurrentPortfolio({ 
     holdings, 
     total_amount_invested,
-    indices }) {
+    indices, }) {
     
     return (
         <>
@@ -122,30 +122,22 @@ export async function getServerSideProps() {
             let buy_price = holdings[i].buy_price;
             let qty = holdings[i].quantity;
 
-            const ticker = holdings[i].ticker;
+            /*const ticker = holdings[i].ticker;
             let current_price = await scraperWeb(ticker + ".NS");
             current_price = parseFloat(current_price.replace(/,/g, ''));
-            holdings[i].CMP = current_price;
+            holdings[i].CMP = current_price;*/
 
             holdings[i].amount_invested = qty * buy_price;
-            holdings[i].pnl = parseFloat(parseFloat((current_price - buy_price)*qty).toFixed(2));
-            holdings[i].pnl_percentage = parseFloat(parseFloat((holdings[i].pnl / holdings[i].amount_invested)*100).toFixed(2));
+            //holdings[i].pnl = parseFloat(parseFloat((current_price - buy_price)*qty).toFixed(2));
+            //holdings[i].pnl_percentage = parseFloat(parseFloat((holdings[i].pnl / holdings[i].amount_invested)*100).toFixed(2));
 
-            total_pnl += holdings[i].pnl;
+            //total_pnl += holdings[i].pnl;
             total_amount_invested += holdings[i].amount_invested;
         }
 
         holdings.sort((a, b) => (b.pnl_percentage > a.pnl_percentage) ? 1 : -1);
 
-        let usd_inr_exchange_rate = await scraperWeb("INR=X");
-        /*holdings.push({
-            ticker: "Total",
-            quantity: "",
-            buy_price: "",
-            CMP: "",
-            pnl_percentage: parseFloat(parseFloat((total_pnl / total_amount_invested)*100).toFixed(2)),
-            pnl: total_pnl
-        });*/
+        /*let usd_inr_exchange_rate = await scraperWeb("INR=X");
         holdings.push({
             ticker: "Total($)",
             quantity: "",
@@ -153,21 +145,20 @@ export async function getServerSideProps() {
             CMP: "",
             pnl_percentage: parseFloat(parseFloat((total_pnl / total_amount_invested)*100).toFixed(2)),
             pnl: parseFloat(total_pnl/usd_inr_exchange_rate).toFixed(2),
-        });
+        });*/
     
         let indices = [];
-        const nifty_50 = await scraperWeb("^NSEI");
+        /*const nifty_50 = await scraperWeb("^NSEI");
         const bank_nifty = await scraperWeb("^NSEBANK");
         indices.push({ 'name': 'Nifty 50', 'price': nifty_50});
         indices.push({ 'name': 'Bank Nifty', 'price': bank_nifty});
-
-        console.log(indices);
+        console.log(indices);*/
         
         return {
             props: { 
                 holdings: JSON.parse(JSON.stringify(holdings)), 
-                total_amount_invested: total_amount_invested, 
-                indices: JSON.parse(JSON.stringify(indices))
+                total_amount_invested: total_amount_invested,
+                indices: JSON.parse(JSON.stringify(indices)),
             },
         };
     } catch (e) {
