@@ -93,7 +93,7 @@ export default function CurrentPortfolio({
     );
 }
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
     try {
         const client = await clientPromise;
         const database = client.db('WeeklyTimeFrame');
