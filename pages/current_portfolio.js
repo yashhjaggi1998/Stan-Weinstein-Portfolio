@@ -13,39 +13,51 @@ import {
     Text,
     HStack
 } from "@chakra-ui/react";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
 
 const cheerio = require('cheerio');
 
-export default function CurrentPortfolio({ 
-    holdings, 
-    total_amount_invested,
-    indices, }) {
+export default function CurrentPortfolio({ holdings, indices, total_amount_invested = 1 }) {
 
-    useEffect(() => {
+    const [holdingsData, setHoldingsData] = useState([]);
+
+    useEffect(async () => {
+        let temp_arr = [];
+
         for (let i = 0; i < holdings.length; i++) 
         {
-            const ticker = holdings[i].ticker;
-            handleCMP(ticker);
+            let row = {};
+            let cmp = await fetchCMP(holdings[i].ticker);
+
+            row.ticker = holdings[i].ticker;
+            row.quantity = holdings[i].quantity;
+            row.buy_price = holdings[i].buy_price;
+            row.amount_invested = row.quantity * row.buy_price;
+
+            row.CMP = cmp;
+            row.pnl = parseFloat(parseFloat((row.CMP - row.buy_price) * row.quantity).toFixed(2));
+            row.pnl_percentage = parseFloat(parseFloat((row.pnl / row.amount_invested)*100).toFixed(2));
+            temp_arr.push(row);
         }
+
+        temp_arr.sort((a, b) => (b.pnl_percentage > a.pnl_percentage) ? 1 : -1);
+        setHoldingsData(temp_arr);
+        console.log(temp_arr);
     }, []);
 
-    const handleCMP = async (symbol) => {
-
+    const fetchCMP = async (ticker) => {
         try {
-            let url = `/api/fetch_current_market_price?symbol=${symbol}`;
+            let url = `/api/fetch_current_market_price?symbol=${ticker}`;
 
             const response = await fetch(url);
-            if (response.ok) {
-                const result = await response.json();
-                console.log(result);
-            }
-        
+            const result = await response.json();
+
+            return result.CMP;
+            
         } catch (error) {
             throw error;
         }
-
     };
     
     return (
@@ -86,7 +98,7 @@ export default function CurrentPortfolio({
                             </Tr>
                         </Thead>  
                         <Tbody>
-                            {holdings.map((holding) => (
+                            {holdingsData.map((holding) => (
                                 <Tr>
                                     <Td 
                                         fontWeight={holding.ticker === "Total($)" ? "bold" : ""}
@@ -109,7 +121,7 @@ export default function CurrentPortfolio({
                                     <Td>{parseFloat(100*holding.amount_invested/total_amount_invested).toFixed(2)}</Td>
                                     <Td>{holding.quantity}</Td>
                                     <Td>{holding.buy_price}</Td>
-                                    <Td>Hello</Td>
+                                    <Td>{holding.CMP}</Td>
                                     
                                 </Tr>
                             ))}   
@@ -132,11 +144,10 @@ export async function getServerSideProps() {
             .find({})
             .toArray();
 
-        const closed_positions = await database
+        /*const closed_positions = await database
             .collection('Closed Positions')
             .find({})
             .toArray();
-        //console.log(closed_positions);
 
         let total_pnl = 0;
         let total_amount_invested = 0;
@@ -151,22 +162,22 @@ export async function getServerSideProps() {
             let buy_price = holdings[i].buy_price;
             let qty = holdings[i].quantity;
 
-            /*const ticker = holdings[i].ticker;
+            const ticker = holdings[i].ticker;
             let current_price = await scraperWeb(ticker + ".NS");
             current_price = parseFloat(current_price.replace(/,/g, ''));
-            holdings[i].CMP = current_price;*/
+            holdings[i].CMP = current_price;
 
             holdings[i].amount_invested = qty * buy_price;
-            //holdings[i].pnl = parseFloat(parseFloat((current_price - buy_price)*qty).toFixed(2));
-            //holdings[i].pnl_percentage = parseFloat(parseFloat((holdings[i].pnl / holdings[i].amount_invested)*100).toFixed(2));
+            holdings[i].pnl = parseFloat(parseFloat((current_price - buy_price)*qty).toFixed(2));
+            holdings[i].pnl_percentage = parseFloat(parseFloat((holdings[i].pnl / holdings[i].amount_invested)*100).toFixed(2));
 
-            //total_pnl += holdings[i].pnl;
+            total_pnl += holdings[i].pnl;
             total_amount_invested += holdings[i].amount_invested;
         }
 
         holdings.sort((a, b) => (b.pnl_percentage > a.pnl_percentage) ? 1 : -1);
 
-        /*let usd_inr_exchange_rate = await scraperWeb("INR=X");
+        let usd_inr_exchange_rate = await scraperWeb("INR=X");
         holdings.push({
             ticker: "Total($)",
             quantity: "",
@@ -174,10 +185,10 @@ export async function getServerSideProps() {
             CMP: "",
             pnl_percentage: parseFloat(parseFloat((total_pnl / total_amount_invested)*100).toFixed(2)),
             pnl: parseFloat(total_pnl/usd_inr_exchange_rate).toFixed(2),
-        });*/
+        });
     
         let indices = [];
-        /*const nifty_50 = await scraperWeb("^NSEI");
+        const nifty_50 = await scraperWeb("^NSEI");
         const bank_nifty = await scraperWeb("^NSEBANK");
         indices.push({ 'name': 'Nifty 50', 'price': nifty_50});
         indices.push({ 'name': 'Bank Nifty', 'price': bank_nifty});
@@ -185,9 +196,8 @@ export async function getServerSideProps() {
         
         return {
             props: { 
-                holdings: JSON.parse(JSON.stringify(holdings)), 
-                total_amount_invested: total_amount_invested,
-                indices: JSON.parse(JSON.stringify(indices)),
+                holdings: JSON.parse(JSON.stringify(holdings)),
+                indices: JSON.parse(JSON.stringify([])),
             },
         };
     } catch (e) {

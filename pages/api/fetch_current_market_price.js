@@ -29,10 +29,8 @@ async function scraperWeb(symbol)
         const price = priceElement.text().trim();
         const index = price.indexOf(".");
         const formattedPrice = price.substring(0, index) + "." + price.substring(index + 1, index + 3);
-        
-        console.log(formattedPrice);
 
-        return formattedPrice;
+        return parseFloat(formattedPrice.replace(/,/g, ''));
     
     } catch (error) {
         throw error;
