@@ -13,6 +13,7 @@ import {
     Text,
     HStack
 } from "@chakra-ui/react";
+import { useEffect } from "react";
 import { Helmet } from "react-helmet";
 
 const cheerio = require('cheerio');
@@ -21,6 +22,31 @@ export default function CurrentPortfolio({
     holdings, 
     total_amount_invested,
     indices, }) {
+
+    useEffect(() => {
+        for (let i = 0; i < holdings.length; i++) 
+        {
+            const ticker = holdings[i].ticker;
+            handleCMP(ticker);
+        }
+    }, []);
+
+    const handleCMP = async (symbol) => {
+
+        try {
+            let url = `/api/fetch_current_market_price?symbol=${symbol}`;
+
+            const response = await fetch(url);
+            if (response.ok) {
+                const result = await response.json();
+                console.log(result);
+            }
+        
+        } catch (error) {
+            throw error;
+        }
+
+    };
     
     return (
         <>
@@ -62,7 +88,10 @@ export default function CurrentPortfolio({
                         <Tbody>
                             {holdings.map((holding) => (
                                 <Tr>
-                                    <Td fontWeight={holding.ticker === "Total($)" ? "bold" : ""}>
+                                    <Td 
+                                        fontWeight={holding.ticker === "Total($)" ? "bold" : ""}
+                                        onClick={() => handleCMP(holding.ticker)}    
+                                    >
                                         {holding.ticker.toUpperCase()}
                                     </Td>
                                     <Td 
@@ -80,7 +109,7 @@ export default function CurrentPortfolio({
                                     <Td>{parseFloat(100*holding.amount_invested/total_amount_invested).toFixed(2)}</Td>
                                     <Td>{holding.quantity}</Td>
                                     <Td>{holding.buy_price}</Td>
-                                    <Td>{holding.CMP}</Td>
+                                    <Td>Hello</Td>
                                     
                                 </Tr>
                             ))}   
@@ -171,6 +200,7 @@ async function scraperWeb(symbol)
     try {
 
         let url = `https://finance.yahoo.com/quote/${symbol}/`;
+        console.log(url);
         const response = await fetch(url);
         const result = await response.text();
 
