@@ -18,12 +18,21 @@ import { Helmet } from "react-helmet";
 
 const cheerio = require('cheerio');
 
-export default function CurrentPortfolio({ holdings, indices, total_amount_invested = 1 }) {
+export default function CurrentPortfolio({ holdings, indices, closed_positions, total_amount_invested = 1 }) {
 
     const [holdingsData, setHoldingsData] = useState([]);
+    const [closedPositionsData, setClosedPositionsData] = useState([]);
 
     useEffect(async () => {
         let temp_arr = [];
+
+        let total_pnl = 0;
+        let total_amount_invested = 0;
+        for (let pos of closed_positions) 
+        {
+            let diff = pos.close_price - pos.buy_price;
+            total_pnl += parseFloat(parseFloat(diff*pos.quantity).toFixed(2));
+        }
 
         for (let i = 0; i < holdings.length; i++) 
         {
@@ -33,15 +42,26 @@ export default function CurrentPortfolio({ holdings, indices, total_amount_inves
             row.ticker = holdings[i].ticker;
             row.quantity = holdings[i].quantity;
             row.buy_price = holdings[i].buy_price;
-            row.amount_invested = row.quantity * row.buy_price;
+            row.amount_invested = parseFloat(row.quantity * row.buy_price).toFixed(2);
+            total_amount_invested += parseFloat(row.amount_invested);
 
             row.CMP = cmp;
             row.pnl = parseFloat(parseFloat((row.CMP - row.buy_price) * row.quantity).toFixed(2));
             row.pnl_percentage = parseFloat(parseFloat((row.pnl / row.amount_invested)*100).toFixed(2));
             temp_arr.push(row);
+
+            total_pnl += row.pnl;
         }
 
         temp_arr.sort((a, b) => (b.pnl_percentage > a.pnl_percentage) ? 1 : -1);
+        temp_arr.push({
+            pnl_percentage: parseFloat(parseFloat((total_pnl/total_amount_invested)*100).toFixed(2)),
+            pnl: parseFloat(total_pnl).toFixed(2),
+            amount_invested: total_amount_invested,
+            ticker: "Total(₹)",
+            
+        });
+
         setHoldingsData(temp_arr);
         console.log(temp_arr);
     }, []);
@@ -91,19 +111,16 @@ export default function CurrentPortfolio({ holdings, indices, total_amount_inves
                                 <Th>Ticker</Th>
                                 <Th>Profit N Loss</Th>
                                 <Th>% P&L</Th>
-                                <Th>% Invested</Th>
-                                <Th>QTY</Th>
-                                <Th>Buy Price</Th>
                                 <Th>CMP</Th>
+                                <Th>Buy Price</Th>
+                                <Th>Amount Invested</Th>
+                                <Th>QTY</Th>
                             </Tr>
                         </Thead>  
                         <Tbody>
                             {holdingsData.map((holding) => (
                                 <Tr>
-                                    <Td 
-                                        fontWeight={holding.ticker === "Total($)" ? "bold" : ""}
-                                        onClick={() => handleCMP(holding.ticker)}    
-                                    >
+                                    <Td fontWeight={holding.ticker === "Total(₹)" ? "bold" : ""}   >
                                         {holding.ticker.toUpperCase()}
                                     </Td>
                                     <Td 
@@ -118,11 +135,15 @@ export default function CurrentPortfolio({ holdings, indices, total_amount_inves
                                     >
                                         {holding.pnl_percentage} %
                                     </Td>
-                                    <Td>{parseFloat(100*holding.amount_invested/total_amount_invested).toFixed(2)}</Td>
-                                    <Td>{holding.quantity}</Td>
-                                    <Td>{holding.buy_price}</Td>
                                     <Td>{holding.CMP}</Td>
-                                    
+                                    <Td>{holding.buy_price}</Td>
+                                    <Td
+                                        color={holding.pnl_percentage >= 0 ? "green" : "red"}
+                                        fontWeight={"bold"}
+                                    >
+                                        {holding.amount_invested}
+                                    </Td>
+                                    <Td>{holding.quantity}</Td>                
                                 </Tr>
                             ))}   
                         </Tbody>
@@ -144,28 +165,16 @@ export async function getServerSideProps() {
             .find({})
             .toArray();
 
-        /*const closed_positions = await database
+        const closed_positions = await database
             .collection('Closed Positions')
             .find({})
             .toArray();
 
-        let total_pnl = 0;
+        /*
         let total_amount_invested = 0;
-        for (let i = 0; i < closed_positions.length; i++) 
-        {
-            let diff = closed_positions[i].close_price - closed_positions[i].buy_price;
-            total_pnl += parseFloat(parseFloat(diff*closed_positions[i].quantity).toFixed(2));
-        }
 
         for (let i = 0; i < holdings.length; i++) 
         {
-            let buy_price = holdings[i].buy_price;
-            let qty = holdings[i].quantity;
-
-            const ticker = holdings[i].ticker;
-            let current_price = await scraperWeb(ticker + ".NS");
-            current_price = parseFloat(current_price.replace(/,/g, ''));
-            holdings[i].CMP = current_price;
 
             holdings[i].amount_invested = qty * buy_price;
             holdings[i].pnl = parseFloat(parseFloat((current_price - buy_price)*qty).toFixed(2));
@@ -197,6 +206,7 @@ export async function getServerSideProps() {
         return {
             props: { 
                 holdings: JSON.parse(JSON.stringify(holdings)),
+                closed_positions: JSON.parse(JSON.stringify(closed_positions)),
                 indices: JSON.parse(JSON.stringify([])),
             },
         };
