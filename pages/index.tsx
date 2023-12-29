@@ -35,8 +35,8 @@ export default function Home({isConnected,}: InferGetServerSidePropsType<typeof 
     return (
         <>
             <Head>
-                <title>Stan Weinstein Portfolio</title>
-                <meta name="description" content="Stan Weinstein Portfolio" />
+                <title>Yashh's Portfolio</title>
+                <meta name="description" content="Yashh's Portfolio" />
             </Head>
 
             <Container maxW="container.xl" marginTop={20}>
@@ -55,7 +55,22 @@ export default function Home({isConnected,}: InferGetServerSidePropsType<typeof 
                             </CardHeader>
                         </Card>
 
-                        <Card>
+                        <Card 
+                            cursor={'pointer'}
+                            onClick={() => window.location.href = "./fundamental_portfolio"}
+                        >
+                            <CardHeader>
+                                <HStack>
+                                    <Icon as={InfoIcon} color='green.500' />
+                                    <Heading size='md'>Fundamental Portfolio</Heading>
+                                </HStack>
+                            </CardHeader>
+                        </Card>
+
+                        <Card
+                            cursor={'pointer'}
+                            onClick={() => window.location.href = "./closed_positions"}
+                        >
                             <CardHeader>
                                 <HStack>
                                     <Icon as={LockIcon} color='green.500' />

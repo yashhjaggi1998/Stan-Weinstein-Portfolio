@@ -15,6 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
+import LoadingSpinner from "./components/loading-spinner";
 
 const cheerio = require('cheerio');
 
@@ -22,8 +23,11 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
 
     const [holdingsData, setHoldingsData] = useState([]);
     const [closedPositionsData, setClosedPositionsData] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(async () => {
+        setIsLoading(true);
+
         let temp_arr = [];
 
         let total_pnl = 0;
@@ -63,7 +67,7 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
         });
 
         setHoldingsData(temp_arr);
-        console.log(temp_arr);
+        setIsLoading(false);
     }, []);
 
     const fetchCMP = async (ticker) => {
@@ -83,7 +87,8 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
     return (
         <>
             <Helmet>
-                <title>Stan Weinstein Portfolio</title>
+                <title>Current Positions</title>
+                <meta name="description" content="Current Positions" />
             </Helmet>
 
             <Container maxW='container.xl' centerContent>
@@ -104,52 +109,53 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
                     
                 </VStack>
                 
-                <TableContainer>
-                    <Table variant='striped' colorScheme='gray' size='lg' >
-                        <Thead>
-                            <Tr>
-                                <Th>Ticker</Th>
-                                <Th>Profit N Loss</Th>
-                                <Th>% P&L</Th>
-                                <Th>CMP</Th>
-                                <Th>Buy Price</Th>
-                                <Th>Amount Invested</Th>
-                                <Th>QTY</Th>
-                            </Tr>
-                        </Thead>  
-                        <Tbody>
-                            {holdingsData.map((holding) => (
+                { isLoading ? <LoadingSpinner /> :
+                    <TableContainer>
+                        <Table variant='striped' colorScheme='gray' size='lg' >
+                            <Thead>
                                 <Tr>
-                                    <Td fontWeight={holding.ticker === "Total(₹)" ? "bold" : ""}   >
-                                        {holding.ticker.toUpperCase()}
-                                    </Td>
-                                    <Td 
-                                        color={holding.pnl >= 0 ? "green" : "red"}
-                                        fontWeight={"bold"}
-                                    >
-                                        {holding.pnl}
-                                    </Td>
-                                    <Td 
-                                        color={holding.pnl_percentage >= 0 ? "green" : "red"}
-                                        fontWeight={"bold"}
-                                    >
-                                        {holding.pnl_percentage} %
-                                    </Td>
-                                    <Td>{holding.CMP}</Td>
-                                    <Td>{holding.buy_price}</Td>
-                                    <Td
-                                        color={holding.pnl_percentage >= 0 ? "green" : "red"}
-                                        fontWeight={"bold"}
-                                    >
-                                        {holding.amount_invested}
-                                    </Td>
-                                    <Td>{holding.quantity}</Td>                
+                                    <Th>Ticker</Th>
+                                    <Th>Profit N Loss</Th>
+                                    <Th>% P&L</Th>
+                                    <Th>CMP</Th>
+                                    <Th>Buy Price</Th>
+                                    <Th>Amount Invested</Th>
+                                    <Th>QTY</Th>
                                 </Tr>
-                            ))}   
-                        </Tbody>
-                    </Table>
-
-                </TableContainer>
+                            </Thead>  
+                            <Tbody>
+                                {holdingsData.map((holding) => (
+                                    <Tr>
+                                        <Td fontWeight={holding.ticker === "Total(₹)" ? "bold" : ""}   >
+                                            {holding.ticker.toUpperCase()}
+                                        </Td>
+                                        <Td 
+                                            color={holding.pnl >= 0 ? "green" : "red"}
+                                            fontWeight={"bold"}
+                                        >
+                                            {holding.pnl}
+                                        </Td>
+                                        <Td 
+                                            color={holding.pnl_percentage >= 0 ? "green" : "red"}
+                                            fontWeight={"bold"}
+                                        >
+                                            {holding.pnl_percentage} %
+                                        </Td>
+                                        <Td>{holding.CMP}</Td>
+                                        <Td>{holding.buy_price}</Td>
+                                        <Td
+                                            color={holding.pnl_percentage >= 0 ? "green" : "red"}
+                                            fontWeight={"bold"}
+                                        >
+                                            {holding.amount_invested}
+                                        </Td>
+                                        <Td>{holding.quantity}</Td>                
+                                    </Tr>
+                                ))}   
+                            </Tbody>
+                        </Table>
+                    </TableContainer>
+                }
             </Container>
         </>
     );
