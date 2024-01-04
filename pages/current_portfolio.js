@@ -19,7 +19,7 @@ import LoadingSpinner from "./components/loading-spinner";
 
 const cheerio = require('cheerio');
 
-export default function CurrentPortfolio({ holdings, indices, closed_positions, total_amount_invested = 1 }) {
+export default function CurrentPortfolio({ holdings, indices, closed_positions, usd_inr_exchange_rate }) {
 
     const [holdingsData, setHoldingsData] = useState([]);
     const [closedPositionsData, setClosedPositionsData] = useState([]);
@@ -29,6 +29,7 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
         setIsLoading(true);
 
         let temp_arr = [];
+        let usd_inr_exchange_rate = await fetchCMP("INR=X");
 
         let total_pnl = 0;
         let total_amount_invested = 0;
@@ -65,6 +66,13 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
             ticker: "Total(₹)",
             
         });
+        
+        console.log(usd_inr_exchange_rate);
+        temp_arr.push({
+            ticker: "Total($)",
+            pnl_percentage: parseFloat(parseFloat((total_pnl / total_amount_invested)*100).toFixed(2)),
+            pnl: parseFloat(total_pnl/usd_inr_exchange_rate).toFixed(2),
+        });
 
         setHoldingsData(temp_arr);
         setIsLoading(false);
@@ -73,9 +81,11 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
     const fetchCMP = async (ticker) => {
         try {
             let url = `/api/fetch_current_market_price?symbol=${ticker}`;
+            console.log(url);
 
             const response = await fetch(url);
             const result = await response.json();
+            console.log(result);
 
             return result.CMP;
             
@@ -126,7 +136,7 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
                             <Tbody>
                                 {holdingsData.map((holding) => (
                                     <Tr>
-                                        <Td fontWeight={holding.ticker === "Total(₹)" ? "bold" : ""}   >
+                                        <Td fontWeight={holding.ticker === "Total($)" ? "bold" : ""}   >
                                             {holding.ticker.toUpperCase()}
                                         </Td>
                                         <Td 

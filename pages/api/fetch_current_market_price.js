@@ -5,7 +5,11 @@ export default async (req, res) => {
     try 
     {
         const symbol = req.query.symbol;
-        const CMP = await scraperWeb(symbol + ".NS");
+        let CMP = 0;
+        if (symbol == "INR=X")
+            CMP = await scraperWeb(symbol);
+        else
+            CMP = await scraperWeb(symbol + ".NS");
  
         res.status(200).json({ 'CMP': CMP });
  
