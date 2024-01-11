@@ -6,7 +6,7 @@ export default async (req, res) => {
     {
         const symbol = req.query.symbol;
         let CMP = 0;
-        if (symbol == "INR=X")
+        if (symbol == "INR=X" || symbol == "^NSEI" || symbol == "^NSEBANK")
             CMP = await scraperWeb(symbol);
         else
             CMP = await scraperWeb(symbol + ".NS");

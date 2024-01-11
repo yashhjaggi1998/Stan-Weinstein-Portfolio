@@ -23,6 +23,7 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
 
     const [holdingsData, setHoldingsData] = useState([]);
     const [closedPositionsData, setClosedPositionsData] = useState([]);
+    const [indicesData, setIndicesData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(async () => {
@@ -48,33 +49,44 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
             row.quantity = holdings[i].quantity;
             row.buy_price = holdings[i].buy_price;
             row.amount_invested = parseFloat(row.quantity * row.buy_price).toFixed(2);
-            total_amount_invested += parseFloat(row.amount_invested);
-
             row.CMP = cmp;
             row.pnl = parseFloat(parseFloat((row.CMP - row.buy_price) * row.quantity).toFixed(2));
             row.pnl_percentage = parseFloat(parseFloat((row.pnl / row.amount_invested)*100).toFixed(2));
             temp_arr.push(row);
 
+            total_amount_invested += parseFloat(row.amount_invested);
             total_pnl += row.pnl;
+        }
+
+        //To calculate %amount invested
+        for (let i = 0; i < temp_arr.length; i++) {
+            temp_arr[i].percentage_amount_invested = parseFloat((temp_arr[i].amount_invested / total_amount_invested)*100).toFixed(2);
         }
 
         temp_arr.sort((a, b) => (b.pnl_percentage > a.pnl_percentage) ? 1 : -1);
         temp_arr.push({
             pnl_percentage: parseFloat(parseFloat((total_pnl/total_amount_invested)*100).toFixed(2)),
             pnl: parseFloat(total_pnl).toFixed(2),
-            amount_invested: total_amount_invested,
+            amount_invested: parseFloat(total_amount_invested).toFixed(2),
             ticker: "Total(₹)",
             
         });
         
-        console.log(usd_inr_exchange_rate);
         temp_arr.push({
             ticker: "Total($)",
-            pnl_percentage: parseFloat(parseFloat((total_pnl / total_amount_invested)*100).toFixed(2)),
+            pnl_percentage: parseFloat((total_pnl / total_amount_invested)*100).toFixed(2),
+            amount_invested: parseFloat(total_amount_invested/usd_inr_exchange_rate).toFixed(2),
             pnl: parseFloat(total_pnl/usd_inr_exchange_rate).toFixed(2),
         });
-
+        
+        let indices = [];
+        const nifty_50 = await fetchCMP("^NSEI");
+        const bank_nifty = await fetchCMP("^NSEBANK");
+        indices.push({ 'name': 'Nifty_50', 'price': nifty_50});
+        indices.push({ 'name': 'Bank_Nifty', 'price': bank_nifty});
+            
         setHoldingsData(temp_arr);
+        setIndicesData(indices);
         setIsLoading(false);
     }, []);
 
@@ -120,51 +132,67 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
                 </VStack>
                 
                 { isLoading ? <LoadingSpinner /> :
-                    <TableContainer>
-                        <Table variant='striped' colorScheme='gray' size='lg' >
-                            <Thead>
-                                <Tr>
-                                    <Th>Ticker</Th>
-                                    <Th>Profit N Loss</Th>
-                                    <Th>% P&L</Th>
-                                    <Th>CMP</Th>
-                                    <Th>Buy Price</Th>
-                                    <Th>Amount Invested</Th>
-                                    <Th>QTY</Th>
-                                </Tr>
-                            </Thead>  
-                            <Tbody>
-                                {holdingsData.map((holding) => (
+                    <VStack spacing={3} mb={8}>
+                        <HStack spacing={6}>
+                            {indicesData.map((index) => (
+                                <Text>
+                                    <b color='green.500'>{index.name}</b> - {index.price}
+                                </Text>
+                            ))}
+                        </HStack>
+
+                        <TableContainer>
+                            <Table variant='striped' colorScheme='gray' size='lg' >
+                                <Thead>
                                     <Tr>
-                                        <Td fontWeight={holding.ticker === "Total($)" ? "bold" : ""}   >
-                                            {holding.ticker.toUpperCase()}
-                                        </Td>
-                                        <Td 
-                                            color={holding.pnl >= 0 ? "green" : "red"}
-                                            fontWeight={"bold"}
-                                        >
-                                            {holding.pnl}
-                                        </Td>
-                                        <Td 
-                                            color={holding.pnl_percentage >= 0 ? "green" : "red"}
-                                            fontWeight={"bold"}
-                                        >
-                                            {holding.pnl_percentage} %
-                                        </Td>
-                                        <Td>{holding.CMP}</Td>
-                                        <Td>{holding.buy_price}</Td>
-                                        <Td
-                                            color={holding.pnl_percentage >= 0 ? "green" : "red"}
-                                            fontWeight={"bold"}
-                                        >
-                                            {holding.amount_invested}
-                                        </Td>
-                                        <Td>{holding.quantity}</Td>                
+                                        <Th>Ticker</Th>
+                                        <Th>% P&L</Th>
+                                        <Th>% Amnt Invested</Th>
+                                        <Th>QTY</Th>
+                                        <Th>Profit N Loss</Th>
+                                        <Th>Amnt Invested</Th>
+                                        <Th>CMP</Th>
+                                        <Th>Buy Price</Th>
                                     </Tr>
-                                ))}   
-                            </Tbody>
-                        </Table>
-                    </TableContainer>
+                                </Thead>  
+                                <Tbody>
+                                    {holdingsData.map((holding) => (
+                                        <Tr>
+                                            <Td fontWeight={holding.ticker === "Total($)" || holding.ticker === "Total(₹)" ? "bold" : ""}   >
+                                                {holding.ticker.toUpperCase()}
+                                            </Td>
+                                            <Td 
+                                                color={holding.pnl_percentage >= 0 ? "green" : "red"}
+                                                fontWeight={"bold"}
+                                            >
+                                                {holding.pnl_percentage} %
+                                            </Td>
+                                            <Td 
+                                                fontWeight = {holding.percentage_amount_invested >= 10 ? "bold" : "" }
+                                            >
+                                                {holding.percentage_amount_invested}
+                                            </Td>
+                                            <Td>{holding.quantity}</Td>
+                                            <Td 
+                                                color={holding.pnl >= 0 ? "green" : "red"}
+                                                fontWeight={"bold"}
+                                            >
+                                                {holding.pnl}
+                                            </Td>
+                                            <Td
+                                                color={holding.pnl_percentage >= 0 ? "green" : "red"}
+                                                fontWeight={"bold"}
+                                            >
+                                                {holding.amount_invested}
+                                            </Td>
+                                            <Td>{holding.CMP}</Td>
+                                            <Td>{holding.buy_price}</Td>      
+                                        </Tr>
+                                    ))}   
+                                </Tbody>
+                            </Table>
+                        </TableContainer>
+                    </VStack>
                 }
             </Container>
         </>
@@ -172,52 +200,19 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
 }
 
 export async function getServerSideProps() {
-    try {
+    
+    try 
+    {
         const client = await clientPromise;
         const database = client.db('WeeklyTimeFrame');
 
-        const holdings = await database
-            .collection('Active Portfolio')
-            .find({})
-            .toArray();
+        const holdings = await database.collection('Active Portfolio').find({}).toArray();
 
-        const closed_positions = await database
-            .collection('Closed Positions')
-            .find({})
-            .toArray();
+        const closed_positions = await database.collection('Closed Positions').find({}).toArray();
 
         /*
-        let total_amount_invested = 0;
-
-        for (let i = 0; i < holdings.length; i++) 
-        {
-
-            holdings[i].amount_invested = qty * buy_price;
-            holdings[i].pnl = parseFloat(parseFloat((current_price - buy_price)*qty).toFixed(2));
-            holdings[i].pnl_percentage = parseFloat(parseFloat((holdings[i].pnl / holdings[i].amount_invested)*100).toFixed(2));
-
-            total_pnl += holdings[i].pnl;
-            total_amount_invested += holdings[i].amount_invested;
-        }
-
-        holdings.sort((a, b) => (b.pnl_percentage > a.pnl_percentage) ? 1 : -1);
-
-        let usd_inr_exchange_rate = await scraperWeb("INR=X");
-        holdings.push({
-            ticker: "Total($)",
-            quantity: "",
-            buy_price: "",
-            CMP: "",
-            pnl_percentage: parseFloat(parseFloat((total_pnl / total_amount_invested)*100).toFixed(2)),
-            pnl: parseFloat(total_pnl/usd_inr_exchange_rate).toFixed(2),
-        });
-    
-        let indices = [];
-        const nifty_50 = await scraperWeb("^NSEI");
-        const bank_nifty = await scraperWeb("^NSEBANK");
-        indices.push({ 'name': 'Nifty 50', 'price': nifty_50});
-        indices.push({ 'name': 'Bank Nifty', 'price': bank_nifty});
-        console.log(indices);*/
+            
+        */
         
         return {
             props: { 
@@ -226,30 +221,8 @@ export async function getServerSideProps() {
                 indices: JSON.parse(JSON.stringify([])),
             },
         };
-    } catch (e) {
+    } 
+    catch (e) {
         console.error(e);
     }
-}
-
-async function scraperWeb(symbol)
-{
-    try {
-
-        let url = `https://finance.yahoo.com/quote/${symbol}/`;
-        console.log(url);
-        const response = await fetch(url);
-        const result = await response.text();
-
-        const $ = cheerio.load(result);
-        const priceElement = $("#quote-header-info").find('fin-streamer[class="Fw(b) Fz(36px) Mb(-4px) D(ib)"]');
-        const price = priceElement.text().trim();
-        const index = price.indexOf(".");
-        const formattedPrice = price.substring(0, index) + "." + price.substring(index + 1, index + 3);
-        
-        return formattedPrice;
-    
-    } catch (error) {
-        throw error;
-    }
-    
 }
