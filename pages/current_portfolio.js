@@ -3,26 +3,23 @@ import {
     Container, 
     VStack, 
     Heading, 
-    Table, 
-    TableContainer, 
+    Table,  
     Tbody, 
     Td, 
     Th, 
     Thead,
     Tr,
     Text,
-    HStack
+    Box,
+    HStack,
 } from "@chakra-ui/react";
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import LoadingSpinner from "./components/loading-spinner";
 
-const cheerio = require('cheerio');
-
 export default function CurrentPortfolio({ holdings, indices, closed_positions, usd_inr_exchange_rate }) {
 
     const [holdingsData, setHoldingsData] = useState([]);
-    const [closedPositionsData, setClosedPositionsData] = useState([]);
     const [indicesData, setIndicesData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
@@ -85,6 +82,8 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
         indices.push({ 'name': 'Nifty_50', 'price': nifty_50});
         indices.push({ 'name': 'Bank_Nifty', 'price': bank_nifty});
             
+        console.log(indices);
+
         setHoldingsData(temp_arr);
         setIndicesData(indices);
         setIsLoading(false);
@@ -113,36 +112,29 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
                 <meta name="description" content="Current Positions" />
             </Helmet>
 
-            <Container maxW='container.xl' centerContent>
+            <Container maxW='container.xl'>
 
                 <VStack spacing={3} mb={8}>
 
                     <Heading as='h5' size='lg' fontWeight='bold' color='black.500'>
                         Current Portfolio
                     </Heading>
-
-                    <HStack spacing={6}>
-                        {indices.map((index) => (
-                            <Text color='green.500'>
-                                <b>{index.name}</b> - {index.price}
-                            </Text>
-                        ))}
-                    </HStack>
                     
                 </VStack>
                 
-                { isLoading ? <LoadingSpinner /> :
-                    <VStack spacing={3} mb={8}>
-                        <HStack spacing={6}>
-                            {indicesData.map((index) => (
-                                <Text>
-                                    <b color='green.500'>{index.name}</b> - {index.price}
-                                </Text>
-                            ))}
-                        </HStack>
+                    { isLoading && indices && holdingsData ? <LoadingSpinner /> :
 
-                        <TableContainer>
-                            <Table variant='striped' colorScheme='gray' size='lg' >
+                        <Box overflowX='scroll'>
+                       
+                            <HStack spacing={3} mb={8}>
+                                {indicesData.map((index) => (
+                                    <Text color='green.500'>
+                                        <b>{index.name}</b> - {index.price}
+                                    </Text>
+                                ))}
+                            </HStack>
+
+                            <Table variant='striped' colorScheme='gray'>
                                 <Thead>
                                     <Tr>
                                         <Th>Ticker</Th>
@@ -191,9 +183,9 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
                                     ))}   
                                 </Tbody>
                             </Table>
-                        </TableContainer>
-                    </VStack>
-                }
+                        
+                        </Box>
+                    }
             </Container>
         </>
     );
