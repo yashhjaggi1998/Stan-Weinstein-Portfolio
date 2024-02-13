@@ -2,7 +2,7 @@ import Head from 'next/head'
 import clientPromise from '../lib/mongodb'
 import type { InferGetServerSidePropsType, GetServerSideProps } from 'next'
 import { Button, Card, CardBody, CardFooter, CardHeader, Center, Container, HStack, Heading, Icon, List, ListIcon, ListItem, SimpleGrid, Text} from '@chakra-ui/react';
-import { InfoIcon, LockIcon, SettingsIcon } from '@chakra-ui/icons';
+import { InfoIcon, LockIcon, SettingsIcon, PlusSquareIcon } from '@chakra-ui/icons';
 
 
 type ConnectionStatus = { isConnected: boolean }
@@ -51,6 +51,18 @@ export default function Home({isConnected,}: InferGetServerSidePropsType<typeof 
                                 <HStack>
                                     <Icon as={InfoIcon} color='green.500' />
                                     <Heading size='md'>Current Portfolio</Heading>
+                                </HStack>
+                            </CardHeader>
+                        </Card>
+
+                        <Card 
+                            cursor={'pointer'}
+                            onClick={() => window.location.href = "./compound_interest_calculator"}
+                        >
+                            <CardHeader>
+                                <HStack>
+                                    <Icon as={PlusSquareIcon} color='blue.500' />
+                                    <Heading size='md'>Compound Interest Calculator</Heading>
                                 </HStack>
                             </CardHeader>
                         </Card>
