@@ -6,3 +6,5 @@ What's next:
 1. User can add/edit their holding directly from the UI.
 2. Build cool charts to analyse holdings based on parameters like amount inveted, return on investment and relative return on portfolio.
 3. I plan to bring a smart compound interest calculator as well to help forecast future returns for my fellow investors.
+
+![Bull & Bear](https://g.foolcdn.com/editorial/images/765862/bull-and-bear-1.jpg)
