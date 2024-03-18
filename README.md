@@ -1,4 +1,4 @@
-This is a practice project to maintain my position trades in Indian Equity Markets. 
+This is a practice project to maintain a record of my positional trades in Indian Equity Markets. 
 
 I have used next.js(API) and react(UI) to implement this project. This is a side project and keep on updating the project bi-weekly to add more cool functionality. 
 
