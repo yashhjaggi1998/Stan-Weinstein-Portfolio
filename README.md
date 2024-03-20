@@ -9,7 +9,7 @@ This is a practice project to maintain a record of my positional trades in India
 - The data fetched is processed to calculate client-side analytics.
 - Finally, the data is rendered. For this I have used a library called Chakra-UI to get a smooth styling :)
 
-# What's next:
+# What's next
 1. User can add/edit their holding directly from the UI.
 2. Build cool charts to analyse holdings based on parameters like amount inveted, return on investment and relative return on portfolio.
 3. I plan to bring a smart compound interest calculator as well to help forecast future returns for my fellow investors.
