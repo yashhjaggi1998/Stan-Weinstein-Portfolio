@@ -3,6 +3,8 @@
 # Overview
 This is a practice project to maintain a record of my positional trades in Indian Equity Markets. 
 
+Live link: (https://stan-weinstein-portfolio.vercel.app/)
+
 # Implementation Details
 - I have used next.js(API) and react(UI) to implement this project. This is a side project and keep on updating the project bi-weekly to add more cool functionality. 
 - On Load, the app make an API call to backend to fetch current market price of all holdings and calculate backend-specific analytics. To get live data, I have written a custom scraper. I plan to replace it with a free API discovered recently.
