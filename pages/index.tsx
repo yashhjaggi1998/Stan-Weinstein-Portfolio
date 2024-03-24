@@ -100,6 +100,18 @@ export default function Home({isConnected,}: InferGetServerSidePropsType<typeof 
                             </CardHeader>
                         </Card>
 
+                        <Card 
+                            cursor={'pointer'}
+                            onClick={() => window.location.href = "./current_portfolio_live"}
+                        >
+                            <CardHeader>
+                                <HStack>
+                                    <Icon as={InfoIcon} color='green.500' />
+                                    <Heading size='md'>Live - Current Portfolio</Heading>
+                                </HStack>
+                            </CardHeader>
+                        </Card>
+
                     </SimpleGrid>
                 </Center>
             </Container>
