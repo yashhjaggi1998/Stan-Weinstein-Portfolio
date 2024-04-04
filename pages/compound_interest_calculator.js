@@ -1,25 +1,43 @@
+import { Helmet } from "react-helmet";
 import { 
     VStack, 
     Heading,
     Input,
     Button,
     HStack,
-    Table,
-    Thead,
-    Tr,
-    Th,
-    Tbody,
-    Td,
     Center,
+    Flex,
+    Container,
+    Grid,
+    FormControl,
+    FormLabel,
+    Box,
+    Divider,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { Helmet } from "react-helmet";
-//import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { Chart } from "react-google-charts";
+import LoadingSpinner from "./components/loading-spinner";
+import { 
+    Navbar,
+    Nav,
+ } from "react-bootstrap";
+ import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function CompoundInterestCalculator() {
 
     const [endOfYearNetWorth, setEndOfYearNetWorth] = useState([]);
+
+    const chart_options = {
+        title: 'Annual Compound Interest',
+        legend: { position: 'bottom' },
+        hAxis: {
+            title: 'Year',
+        },
+        vAxis: {
+            title: 'Amount',
+            format: 'short',
+        },
+    };
 
     const handleSubmit = () => {
 
@@ -42,8 +60,6 @@ export default function CompoundInterestCalculator() {
         console.log(temp_arr);
         setEndOfYearNetWorth(temp_arr);
     };
-    //Data column(s) for axis #0 cannot be of type string
-    //Need to solve this issue
 
     return (
         <>
@@ -51,65 +67,78 @@ export default function CompoundInterestCalculator() {
                 <title>Compound Interest Calculator</title>
             </Helmet>
 
-            <Center>
-            <Heading as='h5' size='lg' fontWeight='bold' color='black.500'>
-                Compound Interest Calculator
-            </Heading>
-            </Center>
+            <Navbar fixed="top" bg="white" className="ps-4 pt-1 pb-0">
+
+                <Navbar.Brand>
+                    <img
+                        alt="YJ Brand"
+                        src="YJ1.png"
+                        width="90"
+                        height="100"
+                        className="align-top"
+                    />
+                </Navbar.Brand>
+            </Navbar>
+
+            <Flex 
+                justifyContent="space-between" 
+                alignItems="flex-start" 
+                height="100vh" 
+                marginTop={"90px"} 
+                className="px-5"
+            >
                 
+                <Box w="25%" p="20px" bg="gray.100" className="mx-2">
+                    
+                    <Heading as="h4" size="sm" color="black.500">
+                        Calculate Compound Interest
+                    </Heading>
 
-            <HStack spacing={8} w={"100%"}>
-                
-                <VStack spacing={8}>
+                    <Divider />
 
-                    <Input
-                        id = "principal_amount"
-                        type="number"
-                        placeholder="Enter the amount at Year 0" 
-                        size="lg" 
-                    />
+                    <FormControl mb="10px">
+                        <FormLabel className="text-muted">Principal</FormLabel>
+                        <Input id="principal_amount" type="number" placeholder="Amount at Year 0" className="rounded-0 border border-secondary"/>
+                    </FormControl>
 
-                    <Input
-                        id = "interest_rate"
-                        type="number"
-                        placeholder="Enter the interest rate" 
-                        size="lg"
-                    />
+                    <FormControl mb="10px">
+                        <FormLabel className="text-muted">Interest Rate</FormLabel>
+                        <Input id="interest_rate" type="number" placeholder="Interest Rate" className="rounded-0 border border-secondary"/>
+                    </FormControl>
 
-                    <Input
-                        id = "time_period"
-                        type="number"
-                        placeholder="Enter the time period (in years)" 
-                        size="lg"
-                    />
+                    <FormControl mb="10px">
+                        <FormLabel className="text-muted">Time Period</FormLabel>
+                        <Input id = "time_period" type="number" placeholder="Time Period (in years)" className="rounded-0 border border-secondary"/>
+                    </FormControl>
 
-                    <Button colorScheme="blue" size="lg" onClick = {handleSubmit}>
+                    <br />
+
+                    <Button colorScheme="blue" size="md" onClick={handleSubmit}>
                         Calculate
-                    </Button>  
+                    </Button> 
 
-                </VStack>
+                </Box>
 
-            </HStack>
+                <Box w="75%" p="20px" bg="gray.200" className="mx-2">
+
                     {
                         endOfYearNetWorth.length > 0 ? (
-                        <Chart
-                            chartType="LineChart"
-                            loader={<div>Loading Chart</div>}
-                            data={[
-                                ['Year', 'Amount'],
-                                ...endOfYearNetWorth.map((item) => [item.year, parseFloat(item.amount)]),
-                            ]}
-                        options={{
-                            hAxis: {
-                                title: 'Year',
-                            },
-                            vAxis: {
-                                title: 'Amount',
-                            },
-                        }}
-                        rootProps={{ 'data-testid': '1' }}
-                        />) : null
+                            <Chart
+                                width={'100%'}
+                                height={'80vh'}
+                                chartType="LineChart"
+                                loader={<LoadingSpinner />}
+                                data={[
+                                    ['Year', 'Amount'],
+                                    ...endOfYearNetWorth.map((item) => [item.year, parseFloat(item.amount)]),
+                                ]}
+                                options={chart_options}
+                                rootProps={{ 'data-testid': '1' }}
+                            />
+                        ) : null
                     }
+                </Box>
+            </Flex>
 
         </>
     );
