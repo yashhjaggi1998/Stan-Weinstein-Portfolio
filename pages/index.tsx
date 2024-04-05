@@ -1,8 +1,10 @@
+import "bootstrap/dist/css/bootstrap.min.css";
 import Head from 'next/head'
 import clientPromise from '../lib/mongodb'
 import type { InferGetServerSidePropsType, GetServerSideProps } from 'next'
 import { Button, Card, CardBody, CardFooter, CardHeader, Center, Container, HStack, Heading, Icon, List, ListIcon, ListItem, SimpleGrid, Text} from '@chakra-ui/react';
 import { InfoIcon, LockIcon, SettingsIcon, PlusSquareIcon } from '@chakra-ui/icons';
+import { Navbar, Nav, NavItem, NavDropdown } from 'react-bootstrap';
 
 
 type ConnectionStatus = { isConnected: boolean }
@@ -39,7 +41,31 @@ export default function Home({isConnected,}: InferGetServerSidePropsType<typeof 
                 <meta name="description" content="Yashh's Portfolio" />
             </Head>
 
-            <Container maxW="container.xl" marginTop={20}>
+
+            <Navbar fixed="top" className="ps-4 pt-1 pb-0" bg="light" data-bs-theme="light">
+
+                <Navbar.Brand>
+                    <img
+                        alt="YJ Brand"
+                        src="YJ1.png"
+                        width="90"
+                        height="100"
+                        className="align-top"
+                    />
+                </Navbar.Brand>
+                <Nav className="ms-5 me-auto">
+                    
+                    <Nav.Link href="/compound_interest_calculator" className="fs-5 me-4">ROI Calculator</Nav.Link>
+                    <NavDropdown title="Portfolio" id="portfolio" className="fs-5">
+                        <NavDropdown.Item href="/current_portfolio" className="fs-5">Current Portfolio</NavDropdown.Item>
+                        <NavDropdown.Item href="/fundamental_portfolio" className="fs-5">Fundamental Portfolio</NavDropdown.Item>
+                    </NavDropdown>
+                    <Nav.Link href="/closed_positions" className="fs-5">Closed Positions</Nav.Link>
+                    <Nav.Link href="/current_portfolio_live" className="fs-5">Live - Current Portfolio</Nav.Link>
+                </Nav>
+            </Navbar>
+
+            <Container maxW="container.xl" marginTop={"90px"}>
                 <Center>
                     <SimpleGrid spacing={4} templateColumns='repeat(auto-fill, minmax(150px, 1fr))'>
                         
