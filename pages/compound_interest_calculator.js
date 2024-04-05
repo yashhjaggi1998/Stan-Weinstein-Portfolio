@@ -1,63 +1,82 @@
 import { Helmet } from "react-helmet";
-import { 
-    VStack, 
+import {  
     Heading,
     Input,
     Button,
-    HStack,
-    Center,
     Flex,
-    Container,
-    Grid,
     FormControl,
     FormLabel,
     Box,
     Divider,
+    Text,
 } from "@chakra-ui/react";
-import { useState } from "react";
-import { Chart } from "react-google-charts";
-import LoadingSpinner from "./components/loading-spinner";
 import { 
     Navbar,
     Nav,
- } from "react-bootstrap";
- import "bootstrap/dist/css/bootstrap.min.css";
+    NavDropdown,
+} from "react-bootstrap";import { useState } from "react";
+import { Chart } from "react-google-charts";
+import LoadingSpinner from "./components/loading-spinner";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 export default function CompoundInterestCalculator() {
 
     const [endOfYearNetWorth, setEndOfYearNetWorth] = useState([]);
+    const nifty_annual_roi = 15;
 
     const chart_options = {
         title: 'Annual Compound Interest',
-        legend: { position: 'bottom' },
+        legend: { position: 'top' },
+        tooltip: { isHtml: true, trigger: 'focus' },
         hAxis: {
             title: 'Year',
         },
         vAxis: {
-            title: 'Amount',
+            title: 'Net Worth',
             format: 'short',
+        },
+        series: {
+            0: { color: 'green', lineWidth: 2, pointSize: 0, lineDashStyle: [4, 4]},
+            1: {color: 'blue', lineWidth: 2, lineDashStyle: [4, 4], pointSize: 0},
         },
     };
 
+    //Format sales in lakhs and Crores
+    const formatSales = (value) => 
+    {   
+        if (value > 10000000) {
+            return (value / 10000000).toFixed(2) + ' Cr';
+        }
+        else if (value > 100000) {
+            return (value / 100000).toFixed(2) + ' L';
+        }
+        else {
+            return value;
+        }   
+    }; 
+
     const handleSubmit = () => {
+
 
         const principal_amount = parseFloat(document.getElementById("principal_amount").value);
         const interest_rate = document.getElementById("interest_rate").value;
         const time_period = document.getElementById("time_period").value;
 
         let amount = principal_amount;
-        let temp_arr = [{year: 0, amount: amount}];
+        let nifty_amount = principal_amount;
+        let temp_arr = [{year: 0, net_worth: amount}];
 
-        for (let i = 1; i <= time_period; i++) {
+        for (let i = 1; i <= time_period; i++) 
+        {
             amount *=  1 + interest_rate/100;
-            temp_arr.push({
-                year: i,
-                amount: amount.toFixed(2),
-            });
+            nifty_amount *= 1 + nifty_annual_roi/100;
+
+            temp_arr.push({ year: i, net_worth: amount.toFixed(2), nifty_net_worth: nifty_amount.toFixed(2)});
+            
             amount += principal_amount;
+            nifty_amount += principal_amount;
         }
         
-        console.log(temp_arr);
         setEndOfYearNetWorth(temp_arr);
     };
 
@@ -66,9 +85,8 @@ export default function CompoundInterestCalculator() {
             <Helmet>
                 <title>Compound Interest Calculator</title>
             </Helmet>
-
-            <Navbar fixed="top" bg="white" className="ps-4 pt-1 pb-0">
-
+            
+            <Navbar fixed="top" className="ps-4 pt-1 pb-0" bg="light" data-bs-theme="light">
                 <Navbar.Brand>
                     <img
                         alt="YJ Brand"
@@ -78,13 +96,23 @@ export default function CompoundInterestCalculator() {
                         className="align-top"
                     />
                 </Navbar.Brand>
+                <Nav className="ms-5 me-auto">
+                    
+                    <Nav.Link href="/compound_interest_calculator" className="fs-5 me-4">ROI Calculator</Nav.Link>
+                    <NavDropdown title="Portfolio" id="portfolio" className="fs-5">
+                        <NavDropdown.Item href="/current_portfolio" className="fs-5">Current Portfolio</NavDropdown.Item>
+                        <NavDropdown.Item href="/fundamental_portfolio" className="fs-5">Fundamental Portfolio</NavDropdown.Item>
+                    </NavDropdown>
+                    <Nav.Link href="/closed_positions" className="fs-5">Closed Positions</Nav.Link>
+                    <Nav.Link href="/current_portfolio_live" className="fs-5">Live - Current Portfolio</Nav.Link>
+                </Nav>
             </Navbar>
 
             <Flex 
                 justifyContent="space-between" 
                 alignItems="flex-start" 
                 height="100vh" 
-                marginTop={"90px"} 
+                marginTop={"120px"} 
                 className="px-5"
             >
                 
@@ -113,9 +141,17 @@ export default function CompoundInterestCalculator() {
 
                     <br />
 
-                    <Button colorScheme="blue" size="md" onClick={handleSubmit}>
+                    <Button className="bg-dark" colorScheme="blue" size="md" onClick={handleSubmit}>
                         Calculate
                     </Button> 
+
+                    {
+                        endOfYearNetWorth.length > 0 ? (
+                            <Text className="mt-4 text-success fw-bold fs-6">
+                                Mr. X, your net worth after {endOfYearNetWorth[endOfYearNetWorth.length - 1].year} years is ₹{formatSales(endOfYearNetWorth[endOfYearNetWorth.length - 1].net_worth)}
+                            </Text>
+                        ) : null
+                    }
 
                 </Box>
 
@@ -129,15 +165,15 @@ export default function CompoundInterestCalculator() {
                                 chartType="LineChart"
                                 loader={<LoadingSpinner />}
                                 data={[
-                                    ['Year', 'Amount'],
-                                    ...endOfYearNetWorth.map((item) => [item.year, parseFloat(item.amount)]),
+                                    ['Year', 'Your Net Worth', 'Underlying Index'],
+                                    ...endOfYearNetWorth.map((item) => [item.year, parseFloat(item.net_worth), parseFloat(item.nifty_net_worth)]),
                                 ]}
                                 options={chart_options}
-                                rootProps={{ 'data-testid': '1' }}
                             />
                         ) : null
                     }
                 </Box>
+
             </Flex>
 
         </>
