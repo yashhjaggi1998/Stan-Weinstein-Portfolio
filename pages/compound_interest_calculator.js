@@ -64,7 +64,7 @@ export default function CompoundInterestCalculator() {
 
         let amount = principal_amount;
         let nifty_amount = principal_amount;
-        let temp_arr = [{year: 0, net_worth: amount}];
+        let temp_arr = [{year: 0, net_worth: amount, nifty_net_worth: amount}];
 
         for (let i = 1; i <= time_period; i++) 
         {
