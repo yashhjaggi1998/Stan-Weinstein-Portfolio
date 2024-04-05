@@ -99,11 +99,11 @@ export default function CompoundInterestCalculator() {
                 <Nav className="ms-5 me-auto">
                     
                     <Nav.Link href="/compound_interest_calculator" className="fs-5 me-4">ROI Calculator</Nav.Link>
-                    <NavDropdown title="Portfolio" id="portfolio" className="fs-5">
+                    <NavDropdown title="Portfolio" id="portfolio" className="fs-5 me-4">
                         <NavDropdown.Item href="/current_portfolio" className="fs-5">Current Portfolio</NavDropdown.Item>
                         <NavDropdown.Item href="/fundamental_portfolio" className="fs-5">Fundamental Portfolio</NavDropdown.Item>
                     </NavDropdown>
-                    <Nav.Link href="/closed_positions" className="fs-5">Closed Positions</Nav.Link>
+                    <Nav.Link href="/closed_positions" className="fs-5 me-4">Closed Positions</Nav.Link>
                     <Nav.Link href="/current_portfolio_live" className="fs-5">Live - Current Portfolio</Nav.Link>
                 </Nav>
             </Navbar>
