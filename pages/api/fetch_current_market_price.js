@@ -1,43 +1,43 @@
-const cheerio = require('cheerio');
-
 export default async (req, res) => {
     
-    try 
-    {
-        const symbol = req.query.symbol;
-        let CMP = 0;
-        if (symbol == "INR=X" || symbol == "^NSEI" || symbol == "^NSEBANK")
-            CMP = await scraperWeb(symbol);
+    try {
+        const tickerList = req.query.tickerList;
+        let finalResult = {};
+        if (tickerList == "INR=X" || tickerList == "^NSEI" || tickerList == "^NSEBANK"){}
         else
-            CMP = await scraperWeb(symbol + ".NS");
+        {
+            const cmpList = await fetchStockPrice(tickerList);
+            for (let priceObj of cmpList)
+            {
+                finalResult[priceObj.symbol] = priceObj.lastPrice;
+            }
+        }
  
-        res.status(200).json({ 'CMP': CMP });
+        res.status(200).json(finalResult);
  
     } catch (e) {
         console.error(e);
     }
-
 };
 
-async function scraperWeb(symbol)
+async function fetchStockPrice(tickerList)
 {
-    try {
+    try 
+    {
+        const url = `https://latest-stock-price.p.rapidapi.com/price?Indices=NIFTY%20500&Identifier=${tickerList}`;
+        const options = {
+            method: 'GET',
+            headers: {
+                'X-RapidAPI-Key': '8278d2b1a5mshdf7a6bbb62161d8p1e1246jsn47a7ba1f8495',
+                'X-RapidAPI-Host': 'latest-stock-price.p.rapidapi.com'
+            }
+        };
 
-        let url = `https://finance.yahoo.com/quote/${symbol}/`;
-        console.log(url);
-        const response = await fetch(url);
-        const result = await response.text();
-
-        const $ = cheerio.load(result);
-        const priceElement = $("#quote-header-info").find('fin-streamer[class="Fw(b) Fz(36px) Mb(-4px) D(ib)"]');
-        const price = priceElement.text().trim();
-        const index = price.indexOf(".");
-        const formattedPrice = price.substring(0, index) + "." + price.substring(index + 1, index + 3);
-
-        return parseFloat(formattedPrice.replace(/,/g, ''));
-    
-    } catch (error) {
+        const response = await fetch(url, options);
+        const result = await response.json();
+        return result;
+    } 
+    catch (error) {
         throw error;
     }
-    
 }

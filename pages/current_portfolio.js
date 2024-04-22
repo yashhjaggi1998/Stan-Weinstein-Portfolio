@@ -16,18 +16,20 @@ import {
 import { useState, useEffect } from "react";
 import { Helmet } from "react-helmet";
 import LoadingSpinner from "./components/loading-spinner";
+import NavBar from "./components/NavBar";
 
-export default function CurrentPortfolio({ holdings, indices, closed_positions, usd_inr_exchange_rate }) {
+export default function CurrentPortfolio({ holdings, indices, closed_positions }) {
 
     const [holdingsData, setHoldingsData] = useState([]);
     const [indicesData, setIndicesData] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(async () => {
+
         setIsLoading(true);
 
         let temp_arr = [];
-        let usd_inr_exchange_rate = await fetchCMP("INR=X");
+        let usd_inr_exchange_rate = 83.5;
 
         let total_pnl = 0;
         let total_amount_invested = 0;
@@ -37,12 +39,25 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
             total_pnl += parseFloat(parseFloat(diff*pos.quantity).toFixed(2));
         }
 
+        //iterate through holdings array and create a combined string of all tickers which is comma separated
+        let tickers = "";
+        for (let i = 0; i < holdings.length; i++){
+            tickers += holdings[i].ticker.toUpperCase() + 'EQN';
+            if (i < holdings.length - 1)
+                tickers += ",";
+        }
+
+        //fetch CMP for all the tickers
+        let cmpList = await fetchCMP(tickers);
+        console.log(cmpList);
+        
+        //iterate through holdings array and calculate pnl for each holding
         for (let i = 0; i < holdings.length; i++) 
         {
             let row = {};
-            let cmp = await fetchCMP(holdings[i].ticker);
+            let cmp = cmpList[holdings[i].ticker.toUpperCase()];
 
-            row.ticker = holdings[i].ticker;
+            row.ticker = holdings[i].ticker.toUpperCase();
             row.quantity = holdings[i].quantity;
             row.buy_price = holdings[i].buy_price;
             row.amount_invested = parseFloat(row.quantity * row.buy_price).toFixed(2);
@@ -77,28 +92,26 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
         });
         
         let indices = [];
-        const nifty_50 = await fetchCMP("^NSEI");
+        /*const nifty_50 = await fetchCMP("^NSEI");
         const bank_nifty = await fetchCMP("^NSEBANK");
         indices.push({ 'name': 'Nifty_50', 'price': nifty_50});
         indices.push({ 'name': 'Bank_Nifty', 'price': bank_nifty});
             
-        console.log(indices);
+        console.log(indices);*/
 
         setHoldingsData(temp_arr);
         setIndicesData(indices);
         setIsLoading(false);
     }, []);
 
-    const fetchCMP = async (ticker) => {
+    const fetchCMP = async (tickerList) => {
         try {
-            let url = `/api/fetch_current_market_price?symbol=${ticker}`;
-            console.log(url);
+            let url = `/api/fetch_current_market_price?tickerList=${tickerList}`;
 
             const response = await fetch(url);
             const result = await response.json();
-            console.log(result);
 
-            return result.CMP;
+            return result;
             
         } catch (error) {
             throw error;
@@ -111,6 +124,8 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions, 
                 <title>Current Positions</title>
                 <meta name="description" content="Current Positions" />
             </Helmet>
+
+            <NavBar />
 
             <Container maxW='container.xl'>
 
@@ -202,10 +217,6 @@ export async function getServerSideProps() {
 
         const closed_positions = await database.collection('Closed Positions').find({}).toArray();
 
-        /*
-            
-        */
-        
         return {
             props: { 
                 holdings: JSON.parse(JSON.stringify(holdings)),
