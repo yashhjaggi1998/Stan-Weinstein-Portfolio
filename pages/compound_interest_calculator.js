@@ -17,7 +17,7 @@ import {
 } from "react-bootstrap";import { useState } from "react";
 import { Chart } from "react-google-charts";
 import LoadingSpinner from "./components/loading-spinner";
-import "bootstrap/dist/css/bootstrap.min.css";
+import NavBar from "./components/NavBar";
 
 export default function CompoundInterestCalculator() {
 
@@ -86,28 +86,7 @@ export default function CompoundInterestCalculator() {
                 <title>Compound Interest Calculator</title>
             </Helmet>
             
-            <Navbar fixed="top" className="ps-4 pt-1 pb-0" bg="light" data-bs-theme="light">
-                <Navbar.Brand>
-                    <img
-                        alt="YJ Brand"
-                        src="YJ1.png"
-                        width="90"
-                        height="100"
-                        className="align-top"
-                    />
-                </Navbar.Brand>
-                <Nav className="ms-5 me-auto">
-                    
-                    <Nav.Link href="/compound_interest_calculator" className="fs-5 me-4">ROI Calculator</Nav.Link>
-                    <NavDropdown title="Portfolio" id="portfolio" className="fs-5 me-4">
-                        <NavDropdown.Item href="/current_portfolio" className="fs-5">Current Portfolio</NavDropdown.Item>
-                        <NavDropdown.Item href="/fundamental_portfolio" className="fs-5">Fundamental Portfolio</NavDropdown.Item>
-                    </NavDropdown>
-                    <Nav.Link href="/closed_positions" className="fs-5 me-4">Closed Positions</Nav.Link>
-                    <Nav.Link href="/current_portfolio_live" className="fs-5">Live - Current Portfolio</Nav.Link>
-                </Nav>
-            </Navbar>
-
+            <NavBar />
             <Flex 
                 justifyContent="space-between" 
                 alignItems="flex-start" 
