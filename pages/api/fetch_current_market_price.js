@@ -1,30 +1,15 @@
 export default async (req, res) => {
-    
     try {
-        const tickerList = req.query.tickerList;
-        let finalResult = {};
-        if (tickerList == "INR=X" || tickerList == "^NSEI" || tickerList == "^NSEBANK"){}
-        else
-        {
-            const cmpList = await fetchStockPrice(tickerList);
-            for (let priceObj of cmpList)
-            {
-                finalResult[priceObj.symbol] = priceObj.lastPrice;
-            }
-        }
- 
-        res.status(200).json(finalResult);
- 
+        const cmpList = await fetchPricesFromAPI();
+        res.status(200).json(cmpList);
     } catch (e) {
         console.error(e);
     }
 };
 
-async function fetchStockPrice(tickerList)
-{
-    try 
-    {
-        const url = `https://latest-stock-price.p.rapidapi.com/price?Indices=NIFTY%20500&Identifier=${tickerList}`;
+async function fetchPricesFromAPI() {
+    try {
+        const url = `https://latest-stock-price.p.rapidapi.com/equities`;
         const options = {
             method: 'GET',
             headers: {

@@ -40,16 +40,13 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions }
         }
 
         //iterate through holdings array and create a combined string of all tickers which is comma separated
-        let tickers = "";
+        let tickers = new Set();
         for (let i = 0; i < holdings.length; i++){
-            tickers += holdings[i].ticker.toUpperCase() + 'EQN';
-            if (i < holdings.length - 1)
-                tickers += ",";
+            tickers.add(holdings[i].ticker.toUpperCase());
         }
 
         //fetch CMP for all the tickers
         let cmpList = await fetchCMP(tickers);
-        console.log(cmpList);
         
         //iterate through holdings array and calculate pnl for each holding
         for (let i = 0; i < holdings.length; i++) 
@@ -92,26 +89,29 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions }
         });
         
         let indices = [];
-        /*const nifty_50 = await fetchCMP("^NSEI");
-        const bank_nifty = await fetchCMP("^NSEBANK");
-        indices.push({ 'name': 'Nifty_50', 'price': nifty_50});
-        indices.push({ 'name': 'Bank_Nifty', 'price': bank_nifty});
-            
-        console.log(indices);*/
 
         setHoldingsData(temp_arr);
         setIndicesData(indices);
         setIsLoading(false);
     }, []);
 
-    const fetchCMP = async (tickerList) => {
+    const fetchCMP = async (tickerSet) => {
         try {
-            let url = `/api/fetch_current_market_price?tickerList=${tickerList}`;
-
+            let cmpList = {};
+            let url = `/api/fetch_current_market_price`;
             const response = await fetch(url);
             const result = await response.json();
+            console.log(result[0]);
 
-            return result;
+            for (let i = 0; i < result.length; i++) {
+                let ticker = result[i].Symbol;
+
+                if (tickerSet.has(ticker)) {
+                    let price = result[i].LTP;
+                    cmpList[ticker] = price;
+                }
+            }
+            return cmpList;
             
         } catch (error) {
             throw error;
