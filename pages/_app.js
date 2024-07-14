@@ -1,4 +1,5 @@
 import { ThemeProvider, theme, CSSReset } from '@chakra-ui/react';
+import './static/styles/globals.css';
 
 function MyApp({ Component, pageProps }) 
 {

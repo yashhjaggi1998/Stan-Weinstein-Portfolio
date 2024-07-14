@@ -47,6 +47,8 @@ export default function CurrentPortfolio({ holdings, indices, closed_positions }
 
         //fetch CMP for all the tickers
         let cmpList = await fetchCMP(tickers);
+        console.log("CMP List");
+        console.log(cmpList);
         
         //iterate through holdings array and calculate pnl for each holding
         for (let i = 0; i < holdings.length; i++) 
