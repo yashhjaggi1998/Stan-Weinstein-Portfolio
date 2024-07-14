@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import {
-    Icon,
     Tr,
     Td,
+    Table,
 } from "@chakra-ui/react";
 
 
@@ -45,9 +45,11 @@ export default function StockPrice({ symbol }) {
     }, [symbol]);
   
     return (
-        <Tr>
-            <Td>Stock Price ({symbol})</Td>
-            <Td>{price !== null ? `₹${price}` : 'Loading...'}</Td>
-        </Tr>
+        <Table>
+            <Tr>
+                <Td>Stock Price ({symbol})</Td>
+                <Td>{price !== null ? `₹${price}` : 'Loading...'}</Td>
+            </Tr>
+        </Table>
     );
 };
