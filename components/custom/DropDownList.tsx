@@ -1,4 +1,4 @@
-import { FinancialYear } from "@/utils/types/FinancialYear";
+import { FinancialYear } from "@/types/FinancialYear";
 
 import { Command, CommandGroup, CommandItem, CommandList, CommandEmpty } from "@/components/ui/command";
 

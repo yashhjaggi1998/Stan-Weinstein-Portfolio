@@ -1,5 +1,6 @@
-import { FinancialYear } from "@/utils/types/FinancialYear";
+import { FinancialYear } from "@/types/FinancialYear";
 import theme from "@/utils/theme";
+
 import { DropdownList } from "@/components/custom/DropDownList";
 
 import { CaretSortIcon, ShadowInnerIcon } from "@radix-ui/react-icons";
@@ -24,7 +25,7 @@ export function MobileDropdown(props: MobileDropdownProps) {
                     variant="outline" 
                     role="combobox"
                     aria-expanded={isDrawerOpen}
-                    className={`text-xl ${theme.background.tertiary} ${theme.border.primary} w-[150px] justify-between`}
+                    className={`text-xl ${theme.background.tertiary} ${theme.border.primary} w-[200px] justify-between`}
                     onClick={() => setDrawerOpen(!isDrawerOpen)}
                 >
                     <ShadowInnerIcon className="h-4 w-4 shrink-0 opacity-50" />

@@ -1,4 +1,4 @@
-import { FinancialYear } from "@/utils/types/FinancialYear";
+import { FinancialYear } from "@/types/FinancialYear";
 import theme from "@/utils/theme";
 import { DropdownList } from "@/components/custom/DropDownList";
 
@@ -25,7 +25,7 @@ export function DesktopDrowpdown(props: DesktopDrowpdownProps) {
                     variant="outline" 
                     role="combobox"
                     aria-expanded={isDrawerOpen}
-                    className={`text-xl ${theme.background.tertiary} ${theme.border.primary} w-[150px] justify-between`}
+                    className={`text-lg ${theme.background.tertiary} ${theme.border.primary} w-[200px] justify-between`}
                     onClick={() => setDrawerOpen(!isDrawerOpen)}
                 >
                     <ShadowInnerIcon className="h-4 w-4 shrink-0 opacity-50" />
@@ -33,7 +33,7 @@ export function DesktopDrowpdown(props: DesktopDrowpdownProps) {
                     <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="p-0" align="start">
+            <PopoverContent className="w-[200px] p-0" align="start">
                 <DropdownList 
                     setListOpen={setDrawerOpen} 
                     setSelectedValue={setSelectedFinancialYear}
