@@ -13,7 +13,7 @@ async function fetchPricesFromAPI() {
         const options = {
             method: 'GET',
             headers: {
-                'X-RapidAPI-Key': '8278d2b1a5mshdf7a6bbb62161d8p1e1246jsn47a7ba1f8495',
+                'X-RapidAPI-Key': 'df41f63d34mshde94a920c1b4968p18a23ejsnda507bf8ac3d',
                 'X-RapidAPI-Host': 'latest-stock-price.p.rapidapi.com'
             }
         };
