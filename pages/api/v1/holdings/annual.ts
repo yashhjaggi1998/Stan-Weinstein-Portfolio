@@ -14,14 +14,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     
     if (req.method === 'GET') {
 
-        let holdings: string[] = [];
-        let response = {
-            percentReturn: 0,
-            absoluteReturn: 0,
-            amountInvested: 0,
-            numberOfHoldings: 0,
-        }; 
-
         const { financialYear } = req.query;
 
         try 
@@ -40,7 +32,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 fiscal_year: financialYear
             }).toArray();
 
+            /*
+                Production code should use the below line to fetch live prices
+                For testing purposes, we will use a local file to fetch the prices
+            */
             const allPrices = await fetchPricesFromAPI();
+            //let allPrices = fs.readFileSync('allPrices.json', 'utf8');
+            //allPrices = JSON.parse(allPrices);
 
             const { holdings, totalPnL, totalAmountInvested } = getAggregateAnalytics(active_postions, closed_positions, allPrices);
             
@@ -48,21 +46,53 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 throw new Error('Invalid data in database');
             }
 
-            res.status(200).json({
+            const activePositions = structureHoldings(allPrices, active_postions);
+            //Sort active positions by %PnL
+            activePositions.sort((a: any, b: any) => {
+                return (100*(b.cmp - b.buy_price)/b.buy_price) - (100*(a.cmp - a.buy_price)/a.buy_price);
+            });
+
+            return res.status(200).json({
                 percentReturn: totalAmountInvested === 0 ? 0 : 100*(totalPnL)/totalAmountInvested,
                 absoluteReturn: totalPnL,
                 amountInvested: totalAmountInvested,
                 currentInvestmentValue: totalAmountInvested + totalPnL,
                 numberOfHoldings: holdings.length,
-                activeHoldings: JSON.parse(JSON.stringify(active_postions)),
-                closedPositions: JSON.parse(JSON.stringify(closed_positions)),
+                activeHoldings: activePositions,
+                closedPositions: closed_positions,
             });
         } 
         catch (e: any) {
+            console.error("ERROR");
             console.error(e);
-            res.status(400).json({ status: 'error', message: e.message });
+            res.status(e.status || 404).json({ 
+                status: 'error', 
+                message: e?.message || "FAILED", 
+            });
         }
     }
+}
+
+function structureHoldings(allPrices: any, holdings: any) {
+
+    for(let i = 0; i < holdings.length; i++) {
+
+        const _cmp = getSpecificStockPrice(allPrices, holdings[i].ticker);
+        
+        const _pnl = holdings[i].quantity * (_cmp - holdings[i].buy_price); //Limit the float to 2 decimal places
+        const pnl = parseFloat(_pnl.toFixed(2));
+        
+        const _percentPnL = 100 * _pnl / (holdings[i].quantity * holdings[i].buy_price);
+        const percentPnL = parseFloat(_percentPnL.toFixed(2));
+        
+        holdings[i] = {
+            ...holdings[i],
+            cmp: _cmp,
+            pnl: pnl,
+            percentPnL: percentPnL,
+        }
+    }
+    return holdings;
 }
 
 function getAggregateAnalytics(activePositions: any, closedPositions: any, allPrices: any) {
@@ -75,6 +105,7 @@ function getAggregateAnalytics(activePositions: any, closedPositions: any, allPr
 
         totalAmountInvested += position.quantity * position.buy_price;
         totalPnL += position.quantity * (getSpecificStockPrice(allPrices, position.ticker) - position.buy_price);
+
         if(!holdings.includes(position.ticker)) {
             holdings.push(position.ticker);
         }
