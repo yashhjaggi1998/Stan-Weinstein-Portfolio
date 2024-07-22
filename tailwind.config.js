@@ -14,10 +14,13 @@ module.exports = {
       padding: "2rem",
       screens: {
         "2xl": "1400px",
-      },
+      }
     },
     extend: {
       colors: {
+        badgesuccess: "#d6f0e0",
+        badgewarning: "#fbf0da",
+        badgeinfo: "#dfe7f6",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
