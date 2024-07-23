@@ -14,7 +14,7 @@ import {
     TableCell, 
 } from "@/components/ui/table";
 import { TabsContent } from "@/components/ui/tabs";
-import { FinancialYear } from "@/types/FinancialYear";
+import { FinancialYear } from "@/types";
 
 interface ActiveHoldingsTabProps {
     activeHoldings: any;
@@ -30,11 +30,13 @@ export function ActiveHoldingsTab(props: ActiveHoldingsTabProps) {
                             
             <div className="col-span-6">
                 <Table className="text-center">
-                    {selectedFinancialYear && 
+                    
+                    {selectedFinancialYear && (
                         <TableCaption className="font-bold text-sm mt-5">
                             List of Active holdings for {selectedFinancialYear.year}
                         </TableCaption>
-                    }
+                    )}
+
                     <TableHeader className="border-b-2">
                         <TableRow className="text-md h-12">
                             <TableHead className="text-start"></TableHead>
@@ -80,7 +82,9 @@ export function ActiveHoldingsTab(props: ActiveHoldingsTabProps) {
                                 >
                                     {holding.percentPnL}
                                 </TableCell>
-                                <TableCell>{30}</TableCell>
+                                <TableCell>
+                                    {30}
+                                </TableCell>
                                 <TableCell>
                                     ₹ {holding.pnl}
                                 </TableCell>
@@ -93,7 +97,9 @@ export function ActiveHoldingsTab(props: ActiveHoldingsTabProps) {
                                 <TableCell>
                                     ₹ {holding.buy_price}
                                 </TableCell>
-                                <TableCell>{holding.quantity}</TableCell>
+                                <TableCell>
+                                    {holding.quantity}
+                                </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
