@@ -65,7 +65,6 @@ export default function Portfolio() {
             result.absoluteReturnUSD = result.absoluteReturn * exchangeRate;
             result.amountInvestedUSD = result.amountInvested * exchangeRate;
             result.currentInvestmentValueUSD = result.currentInvestmentValue * exchangeRate;
-            console.log(result);
 
             setActiveHoldings(result.activeHoldings);
             setTotalPnl(result.absoluteReturn);
@@ -110,7 +109,11 @@ export default function Portfolio() {
                             <TabsTrigger value="tax">Tax</TabsTrigger>
                         </TabsList>
 
-                        <OverviewTab overview_data={annualOverviewData}/>
+                        <OverviewTab 
+                            overview_data={annualOverviewData} 
+                            exchange_rate={exchangeRate}
+                            selected_financial_year={selectedFinancialYear}
+                        />
 
                         {selectedFinancialYear && <ActiveHoldingsTab activeHoldings={activeHoldings} selectedFinancialYear={selectedFinancialYear} />}
                         <TabsContent value="dividends">
