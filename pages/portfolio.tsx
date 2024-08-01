@@ -53,7 +53,7 @@ export default function Portfolio() {
             if (!selectedFinancialYear) return;
 
             const _FY = selectedFinancialYear?.year;
-            const response = await fetch('/api/v1/holdings/annual?financialYear=' + _FY);
+            const response = await fetch('/api/v2/holdings/annual?financialYear=' + _FY);
 
             //Unable to fetch live price. Throw an error or use a different approach to handle this
             if (response.status !== 200) {
