@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 import clientPromise from "../../../../lib/mongodb";
 import { fetchPricesFromAPI } from '../../../../api/helpers/fetchLivePrice';
+import fs from 'fs';
 
 async function initializeDatabaseClient(){
     const client = await clientPromise;
@@ -37,8 +38,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
                 For testing purposes, we will use a local file to fetch the prices
             */
             const allPrices = await fetchPricesFromAPI();
+            fs.writeFileSync('allPrices.json', JSON.stringify(allPrices));
             //let allPrices = fs.readFileSync('allPrices.json', 'utf8');
             //allPrices = JSON.parse(allPrices);
+            console.log(allPrices);
 
             const { holdings, totalPnL, totalAmountInvested } = getAggregateAnalytics(active_postions, closed_positions, allPrices);
             
@@ -47,6 +50,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             }
 
             const activePositions = structureHoldings(allPrices, active_postions);
+            console.log(activePositions);
             //Sort active positions by %PnL
             activePositions.sort((a: any, b: any) => {
                 return (100*(b.cmp - b.buy_price)/b.buy_price) - (100*(a.cmp - a.buy_price)/a.buy_price);
@@ -78,6 +82,11 @@ function structureHoldings(allPrices: any, holdings: any) {
     for(let i = 0; i < holdings.length; i++) {
 
         const _cmp = getSpecificStockPrice(allPrices, holdings[i].ticker);
+
+        if(_cmp === 0) {
+            console.log("Stock price not found for ", holdings[i].ticker);
+            throw { status: 404, message: "Stock price not found for " + holdings[i].ticker };
+        }
         
         const _pnl = holdings[i].quantity * (_cmp - holdings[i].buy_price); //Limit the float to 2 decimal places
         const pnl = parseFloat(_pnl.toFixed(2));
@@ -121,7 +130,7 @@ function getAggregateAnalytics(activePositions: any, closedPositions: any, allPr
 function getSpecificStockPrice(allPrices: any, ticker: string) {
     let price = 0;
     for (let stock of allPrices) {
-        if (stock.Symbol === ticker) {
+        if (stock["NSE Symbol"] === ticker) {
             price = stock.LTP;
             break;
         }
