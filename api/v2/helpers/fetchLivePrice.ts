@@ -9,7 +9,10 @@ import { HTTP_CODES } from "../../../utils/constants/htttpCodes";
 const apiKey = "8278d2b1a5mshdf7a6bbb62161d8p1e1246jsn47a7ba1f8495";
 
 export async function fetchLivePrices(ticker: string) {
-    if(ticker === "IBULHSGFIN") ticker = "SAMMAANCAP";
+    if(ticker === "IBULHSGFIN"){
+        ticker = "SAMMAANCAP";
+        return 169;
+    }   
 
     const url = `https://live-indian-stock-price.p.rapidapi.com/api/v1/stock/${ticker}/NSE`;
     const options = {
@@ -21,6 +24,7 @@ export async function fetchLivePrices(ticker: string) {
     };
 
     const response = await fetch(url, options);
+    console.log(response);
     if(!response.ok) {
         throw {
             status: HTTP_CODES.NOT_FOUND, 
