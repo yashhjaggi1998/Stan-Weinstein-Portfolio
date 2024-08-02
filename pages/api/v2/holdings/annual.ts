@@ -20,10 +20,10 @@ async function getCMPofTickers(tickerList: string[]) {
             try {
                 const price = await fetchLivePrices(ticker.toUpperCase());
                 cmpList.set(ticker, price);
-            } catch (err) {
+            } catch (err: any) {
                 throw {
-                    status: HTTP_CODES.NOT_FOUND,
-                    message: `Error fetching price from external API for ${ticker.toUpperCase()}`,
+                    status: err?.status || HTTP_CODES.NOT_FOUND,
+                    message: err?.message || `Error fetching price from external API for ${ticker.toUpperCase()}`,
                 };
             }
         })
@@ -87,7 +87,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         catch (e: any) {
             console.error("ERROR");
             console.error(e);
-            res.status(e.status || 404).json({
+            res.status(e?.status || 404).json({
                 message: e?.message || "FAILED", 
             });
         }
