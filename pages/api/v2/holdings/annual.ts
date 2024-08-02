@@ -4,6 +4,9 @@ import { initializeDatabaseClient } from '../../../../utils/initializeDbClient';
 import { getAnnualPositions } from '@/api/v2/helpers/annualPositions'
 import { HTTP_CODES } from '@/utils/constants/htttpCodes';
 import { structureHoldings } from '@/api/v2/helpers/structureHoldings';
+import pLimit from 'p-limit';
+
+const limit = pLimit(5);
 
 interface QueryParams {
     financialYear?: string,
@@ -12,10 +15,21 @@ interface QueryParams {
 async function getCMPofTickers(tickerList: string[]) {
     let cmpList:Map<string, number> = new Map();
 
-    for(const ticker of tickerList){   
-        const price = await fetchLivePrices(ticker.toUpperCase());
-        cmpList.set(ticker, price);
-    }
+    const promises = tickerList.map( ticker => 
+        limit(async () => {
+            try {
+                const price = await fetchLivePrices(ticker.toUpperCase());
+                cmpList.set(ticker, price);
+            } catch (err) {
+                throw {
+                    status: HTTP_CODES.NOT_FOUND,
+                    message: `Error fetching price from external API for ${ticker.toUpperCase()}`,
+                };
+            }
+        })
+    );
+
+    await Promise.all(promises);
     return cmpList;
 }
 
