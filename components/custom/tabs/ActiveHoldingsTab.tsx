@@ -21,6 +21,10 @@ interface ActiveHoldingsTabProps {
     selectedFinancialYear: FinancialYear;
 }
 
+function formatAmount(amount: number) {
+    return parseFloat((amount).toFixed(2)).toLocaleString();
+}
+
 export function ActiveHoldingsTab(props: ActiveHoldingsTabProps) {
 
     const { activeHoldings, selectedFinancialYear } = props;
@@ -80,22 +84,22 @@ export function ActiveHoldingsTab(props: ActiveHoldingsTabProps) {
                                 <TableCell
                                     className={`font-bold ${holding.percentPnL >= 25 ? "text-green-700" : holding.percentPnL < -10 ? "text-red-800" : "text-blue-900"} `}
                                 >
-                                    {holding.percentPnL}
+                                    {formatAmount(holding.percentPnL)}
                                 </TableCell>
                                 <TableCell>
                                     {30}
                                 </TableCell>
                                 <TableCell>
-                                    ₹ {holding.pnl}
+                                    ₹ {formatAmount(holding.pnl)}
                                 </TableCell>
                                 <TableCell>
-                                    ₹ {holding.quantity * holding.buy_price}
+                                    ₹ {formatAmount(holding.quantity * holding.buy_price)}
                                 </TableCell>
                                 <TableCell>
                                     ₹ {holding.cmp}
                                 </TableCell>
                                 <TableCell>
-                                    ₹ {holding.buy_price}
+                                    ₹ {formatAmount(holding.buy_price)}
                                 </TableCell>
                                 <TableCell>
                                     {holding.quantity}
