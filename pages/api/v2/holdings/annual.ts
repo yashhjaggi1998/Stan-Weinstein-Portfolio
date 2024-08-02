@@ -6,7 +6,7 @@ import { HTTP_CODES } from '@/utils/constants/htttpCodes';
 import { structureHoldings } from '@/api/v2/helpers/structureHoldings';
 import pLimit from 'p-limit';
 
-const limit = pLimit(5);
+const limit = pLimit(8);
 
 interface QueryParams {
     financialYear?: string,
