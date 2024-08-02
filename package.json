@@ -26,6 +26,7 @@
         "lucide-react": "^0.408.0",
         "mongodb": "^4.8.1",
         "next": "latest",
+        "p-limit": "^6.1.0",
         "postcss": "^8.4.39",
         "react": "^18.2.0",
         "react-bootstrap": "^2.10.2",
