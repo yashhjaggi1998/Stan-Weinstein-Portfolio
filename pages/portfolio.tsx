@@ -126,14 +126,12 @@ export default function Portfolio() {
                             />
                         )}
 
-                        <TabsContent value="dividends">
-                            
+                        <TabsContent value="dividends">  
                         </TabsContent>
                         <TabsContent value="tax">
                             <div>Tax</div>
                         </TabsContent>
                     </Tabs>
-
                 </div>
             </div>
         </>

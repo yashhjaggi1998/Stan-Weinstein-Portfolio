@@ -19,7 +19,6 @@ import { SlArrowRight } from "react-icons/sl";
 import {
     Drawer,
     DrawerContent,
-    DrawerTrigger
 } from "@/components/ui/drawer";
 import { useState } from "react";
 
@@ -180,7 +179,7 @@ export function MobileActiveTab(props: ActiveHoldingsTabProps) {
                 </Table>
             )}
 
-            {selectedHolding && 
+            {selectedHolding && (
                 <Drawer open={openDetailHolding} onOpenChange={setOpenDetailHolding}>
                     <DrawerContent>
                         <div className="font-bold flex items-center space-x-4 m-4">
@@ -231,7 +230,7 @@ export function MobileActiveTab(props: ActiveHoldingsTabProps) {
                         </div>
                     </DrawerContent>
                 </Drawer>
-            }
+            )}
         </>
     );
 }
