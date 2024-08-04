@@ -14,7 +14,8 @@ export async function fetchLivePrices(ticker: string) {
         return 169;
     }   
 
-    const url = `https://live-indian-stock-price.p.rapidapi.com/api/v1/stock/${ticker}/NSE`;
+    const url = `https://live-indian-stock-price.p.rapidapi.com/api/v1/finance/stock/${ticker}/NSE`;
+    console.log(url);
     const options = {
         method: 'GET',
         headers: {
@@ -24,8 +25,19 @@ export async function fetchLivePrices(ticker: string) {
     };
 
     const response = await fetch(url, options);
-    console.log(response);
+
+    console.log("Raw response from API");
+    console.log(response.url);
+    console.log(response.status + ": " + response.statusText);
+
     if(!response.ok) {
+        if(response.status === HTTP_CODES.TOO_MANY_REQUESTS){
+            throw {
+                status: HTTP_CODES.TOO_MANY_REQUESTS,
+                message: `API Limit exceeded for ${ticker}`,
+            }
+        }
+
         throw {
             status: HTTP_CODES.NOT_FOUND, 
             message: `Error Fetching Live Stock Price for ${ticker}`,
