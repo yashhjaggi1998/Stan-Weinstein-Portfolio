@@ -188,63 +188,47 @@ export function MobileActiveTab(props: ActiveHoldingsTabProps) {
                                 <AvatarImage src={selectedHolding.logo_url} alt={selectedHolding.ticker} />
                                 <AvatarFallback>CN</AvatarFallback>
                             </Avatar>
-                            <p>
-                                {selectedHolding.ticker} {" "}
-                                <Badge className={`font-bold text-xs ${selectedHolding.percentPnL >= 25 ? "hover:bg-badgesuccess bg-badgesuccess text-green-900" : selectedHolding.percentPnL < -10 ? "hover:bg-badgewarning bg-badgewarning text-red-900" : "hover:bg-badgeinfo bg-badgeinfo text-blue-900"} `}>
-                                    {selectedHolding.percentPnL >= 25 ? "STRONG" : selectedHolding.percentPnL < -10 ? "WEAK" : "MODERATE"}
-                                </Badge>
-                            </p>
+                            <p>{selectedHolding.ticker}</p>
+                            <Badge className={`font-bold text-xs ${selectedHolding.percentPnL >= 25 ? "hover:bg-badgesuccess bg-badgesuccess text-green-900" : selectedHolding.percentPnL < -10 ? "hover:bg-badgewarning bg-badgewarning text-red-900" : "hover:bg-badgeinfo bg-badgeinfo text-blue-900"} `}>
+                                {selectedHolding.percentPnL >= 25 ? "STRONG" : selectedHolding.percentPnL < -10 ? "WEAK" : "MODERATE"}
+                            </Badge>
                         </div>
 
-                        <Table className="mx-4 my-2">
-                            <TableBody>
-                                <TableRow>
-                                    <TableCell>Percent PnL</TableCell>
-                                    <TableCell className={`font-bold ${selectedHolding.percentPnL >= 25 ? "text-green-700" : selectedHolding.percentPnL < -10 ? "text-red-800" : "text-blue-900"}`}>
-                                        {formatAmount(selectedHolding.percentPnL)}%
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>PnL</TableCell>
-                                    <TableCell className={`font-bold ${selectedHolding.percentPnL >= 25 ? "text-green-700" : selectedHolding.percentPnL < -10 ? "text-red-800" : "text-blue-900"}`}>
-                                        ₹ {formatAmount(selectedHolding.pnl)}
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>Market Price</TableCell>
-                                    <TableCell>
-                                        {selectedHolding.cmp}
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>Quantity</TableCell>
-                                    <TableCell>
-                                        {formatAmount(selectedHolding.quantity)}
-                                    </TableCell>
-                                </TableRow>
-                            </TableBody>
-                        </Table>
+                        <div className="grid grid-cols-2 mx-8 my-2">
+                            <div className="grid gap-2">
+                                <p>Percent PnL</p>
+                                <p>PnL</p>
+                                <p>Market Price</p>
+                                <p>Quantity</p>
+                            </div>
+                            <div className="grid gap-2">
+                                <p className={`font-bold ${selectedHolding.percentPnL >= 25 ? "text-green-700" : selectedHolding.percentPnL < -10 ? "text-red-800" : "text-blue-900"}`}>
+                                    {formatAmount(selectedHolding.percentPnL)}%
+                                </p>
+                                <p className={`font-bold ${selectedHolding.percentPnL >= 25 ? "text-green-700" : selectedHolding.percentPnL < -10 ? "text-red-800" : "text-blue-900"}`}>
+                                    ₹ {formatAmount(selectedHolding.pnl)}
+                                </p>
+                                <p>{selectedHolding.cmp}</p>
+                                <p>{formatAmount(selectedHolding.quantity)}</p>
+                            </div>
+                        </div>
 
-                        <div className="font-bold mx-4 my-2">
+                        <div className="font-bold mx-6 mt-2">
                             Buy Info
                         </div>
 
-                        <Table className="mx-4 my-2">
-                            <TableBody>
-                                <TableRow>
-                                    <TableCell>Price</TableCell>
-                                    <TableCell>{selectedHolding.buy_price}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>Date</TableCell>
-                                    <TableCell>{selectedHolding.buy_date}</TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell>Reason</TableCell>
-                                    <TableCell>{selectedHolding.entry_stage}</TableCell>
-                                </TableRow>
-                            </TableBody>
-                        </Table>
+                        <div className="grid grid-cols-2 mx-8 mt-2 mb-4">
+                            <div className="grid gap-2">
+                                <p>Price</p>
+                                <p>Date</p>
+                                <p>Reason</p>
+                            </div>
+                            <div className="grid gap-2">
+                                <p>₹ {selectedHolding.buy_price}</p>
+                                <p>₹ {selectedHolding.buy_date}</p>
+                                <p>{selectedHolding.entry_stage}</p>
+                            </div>
+                        </div>
                     </DrawerContent>
                 </Drawer>
             }

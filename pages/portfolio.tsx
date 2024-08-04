@@ -115,20 +115,19 @@ export default function Portfolio() {
                             selected_financial_year={selectedFinancialYear}
                         />
 
-                        {selectedFinancialYear && 
+                        {selectedFinancialYear && ( isDesktop ?  
                             <ActiveHoldingsTab 
                                 activeHoldings={activeHoldings} 
                                 selectedFinancialYear={selectedFinancialYear} 
+                            /> : 
+                            <MobileActiveTab
+                                activeHoldings={activeHoldings}
+                                selectedFinancialYear={selectedFinancialYear}
                             />
-                        }
+                        )}
 
                         <TabsContent value="dividends">
-                            {selectedFinancialYear &&
-                                <MobileActiveTab
-                                    activeHoldings={activeHoldings}
-                                    selectedFinancialYear={selectedFinancialYear}
-                                />
-                            }
+                            
                         </TabsContent>
                         <TabsContent value="tax">
                             <div>Tax</div>
