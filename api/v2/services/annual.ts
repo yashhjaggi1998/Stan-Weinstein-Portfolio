@@ -14,13 +14,13 @@ export default async function annual(financialYear: string) {
 
     // Read positions from DB
     // PROD CODE
-    //const {active_positions, closed_positions} = await getAnnualPositions(DbClient, financialYear);
+    const {active_positions, closed_positions} = await getAnnualPositions(DbClient, financialYear);
     
     //fs.writeFileSync('activePositions.json', JSON.stringify(active_positions));
     //fs.writeFileSync('closedPositions.json', JSON.stringify(closed_positions));
     // DEV CODE
-    const active_positions: any = JSON.parse(fs.readFileSync('activePositions.json', 'utf8'));
-    const closed_positions: any = JSON.parse(fs.readFileSync('closedPositions.json', 'utf8'));
+    //const active_positions: any = JSON.parse(fs.readFileSync('activePositions.json', 'utf8'));
+    //const closed_positions: any = JSON.parse(fs.readFileSync('closedPositions.json', 'utf8'));
 
     // Get SET of tickers
     let active_tickers: string[] = [];
@@ -31,11 +31,11 @@ export default async function annual(financialYear: string) {
     }
 
     // PROD CODE
-    //const cmpList = await getCMPofTickers(active_tickers);
+    const cmpList = await getCMPofTickers(active_tickers);
     //fs.writeFileSync('allPrices.json', JSON.stringify(Object.fromEntries(cmpList)));
     // DEV CODE
-    let cmpList:any = JSON.parse(fs.readFileSync('allPrices.json', 'utf8'));
-    cmpList = new Map(Object.entries(cmpList));
+    //let cmpList:any = JSON.parse(fs.readFileSync('allPrices.json', 'utf8'));
+    //cmpList = new Map(Object.entries(cmpList));
 
     const activePositions = structureHoldings(active_positions, cmpList);
 
