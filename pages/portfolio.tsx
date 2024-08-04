@@ -11,7 +11,7 @@ import { convertINRToUSD } from "@/utils/ConvertINRToUSD";
 import { AnnualOverviewData } from "@/types/AnnualOverviewData";
 import { FinancialYear } from "@/types/FinancialYear";
 import { OverviewTab } from "@/components/custom/tabs/OverviewTab";
-import { ActiveHoldingsTab } from "@/components/custom/tabs/ActiveHoldingsTab";
+import { ActiveHoldingsTab, MobileActiveTab } from "@/components/custom/tabs/ActiveHoldingsTab";
 
 export default function Portfolio() {
 
@@ -115,9 +115,20 @@ export default function Portfolio() {
                             selected_financial_year={selectedFinancialYear}
                         />
 
-                        {selectedFinancialYear && <ActiveHoldingsTab activeHoldings={activeHoldings} selectedFinancialYear={selectedFinancialYear} />}
+                        {selectedFinancialYear && 
+                            <ActiveHoldingsTab 
+                                activeHoldings={activeHoldings} 
+                                selectedFinancialYear={selectedFinancialYear} 
+                            />
+                        }
+
                         <TabsContent value="dividends">
-                            <div>Dividends</div>
+                            {selectedFinancialYear &&
+                                <MobileActiveTab
+                                    activeHoldings={activeHoldings}
+                                    selectedFinancialYear={selectedFinancialYear}
+                                />
+                            }
                         </TabsContent>
                         <TabsContent value="tax">
                             <div>Tax</div>
