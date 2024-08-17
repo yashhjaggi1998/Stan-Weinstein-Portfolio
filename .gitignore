@@ -1,0 +1,8 @@
+
+*.gz
+/.next
+/node_modules
+/.next
+activePositions.json
+closedPositions.json
+.next/server/pages-manifest.json
