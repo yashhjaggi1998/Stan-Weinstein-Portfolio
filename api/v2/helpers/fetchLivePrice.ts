@@ -11,11 +11,9 @@ const apiKey = "8278d2b1a5mshdf7a6bbb62161d8p1e1246jsn47a7ba1f8495";
 export async function fetchLivePrices(ticker: string) {
     if(ticker === "IBULHSGFIN"){
         ticker = "SAMMAANCAP";
-        return 169;
     }   
 
     const url = `https://live-indian-stock-price.p.rapidapi.com/api/v1/finance/stock/${ticker}/NSE`;
-    console.log(url);
     const options = {
         method: 'GET',
         headers: {
@@ -25,10 +23,6 @@ export async function fetchLivePrices(ticker: string) {
     };
 
     const response = await fetch(url, options);
-
-    console.log("Raw response from API");
-    console.log(response.url);
-    console.log(response.status + ": " + response.statusText);
 
     if(!response.ok) {
         if(response.status === HTTP_CODES.TOO_MANY_REQUESTS){

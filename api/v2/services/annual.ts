@@ -1,20 +1,13 @@
-import { initializeDatabaseClient } from '@/utils/initializeDbClient';
 import { structureHoldings } from '@/api/v2/helpers/structureHoldings';
+import { getDBHoldings } from '@/api/v2/helpers/fetchDBData'
+import { getCMP } from '../helpers/getCMPofTickers';
 import { HTTP_CODES } from '@/utils/constants/htttpCodes';
-import { fetchLivePrices } from '@/api/v2/helpers/fetchLivePrice';
-import { getAnnualPositions } from '@/api/v2/helpers/annualPositions'
-import pLimit from 'p-limit';
-import fs from "fs";
-
-const limit = pLimit(8);
 
 export default async function annual(financialYear: string) {
-    
-    const DbClient = await initializeDatabaseClient();
 
     // Read positions from DB
     // PROD CODE
-    const {active_positions, closed_positions} = await getAnnualPositions(DbClient, financialYear);
+    const {active_positions, closed_positions} = await getDBHoldings(financialYear);
     
     //fs.writeFileSync('activePositions.json', JSON.stringify(active_positions));
     //fs.writeFileSync('closedPositions.json', JSON.stringify(closed_positions));
@@ -22,16 +15,8 @@ export default async function annual(financialYear: string) {
     //const active_positions: any = JSON.parse(fs.readFileSync('activePositions.json', 'utf8'));
     //const closed_positions: any = JSON.parse(fs.readFileSync('closedPositions.json', 'utf8'));
 
-    // Get SET of tickers
-    let active_tickers: string[] = [];
-    for(const position of active_positions) {
-        if(!active_tickers.includes(position.ticker)) {
-            active_tickers.push(position.ticker)
-        }
-    }
-
     // PROD CODE
-    const cmpList = await getCMPofTickers(active_tickers);
+    const { cmpList, active_tickers } = await getCMP(active_positions);
     //fs.writeFileSync('allPrices.json', JSON.stringify(Object.fromEntries(cmpList)));
     // DEV CODE
     //let cmpList:any = JSON.parse(fs.readFileSync('allPrices.json', 'utf8'));
@@ -57,26 +42,7 @@ export default async function annual(financialYear: string) {
 }
 
 // ************************* HELPER functions ******************************
-async function getCMPofTickers(tickerList: string[]) {
-    let cmpList:Map<string, number> = new Map();
 
-    const promises = tickerList.map( ticker => 
-        limit(async () => {
-            try {
-                const price = await fetchLivePrices(ticker.toUpperCase());
-                cmpList.set(ticker, price);
-            } catch (err: any) {
-                throw {
-                    status: err?.status || HTTP_CODES.NOT_FOUND,
-                    message: err?.message || `Error fetching price from external API for ${ticker.toUpperCase()}`,
-                };
-            }
-        })
-    );
-
-    await Promise.all(promises);
-    return cmpList;
-}
 
 function getAggregateAnalytics(activePositions: any[], closedPositions: any[], cmpList: Map<string, number>) {
 
