@@ -127,7 +127,7 @@ export function MobileActiveTab(props: ActiveHoldingsTabProps) {
     const [selectedHolding, setSelecetedHolding] = useState<any | null>(null);
     
     return (
-        <>
+        <TabsContent value="active_holdings">
             {activeHoldings && ( 
                 <Table className="text-center">
 
@@ -231,6 +231,6 @@ export function MobileActiveTab(props: ActiveHoldingsTabProps) {
                     </DrawerContent>
                 </Drawer>
             )}
-        </>
+        </TabsContent>
     );
 }

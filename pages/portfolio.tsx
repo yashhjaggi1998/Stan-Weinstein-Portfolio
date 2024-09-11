@@ -1,4 +1,4 @@
-import {useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import Head from 'next/head';
 
 import { useMediaQuery } from "@/hooks/use-media-query";
@@ -12,16 +12,19 @@ import { AnnualOverviewData } from "@/types/AnnualOverviewData";
 import { FinancialYear } from "@/types/FinancialYear";
 import { OverviewTab } from "@/components/custom/tabs/OverviewTab";
 import { ActiveHoldingsTab, MobileActiveTab } from "@/components/custom/tabs/ActiveHoldingsTab";
+import LoadingSpinner from "@/pages/components/loading-spinner";
 
 export default function Portfolio() {
 
     const isDesktop = useMediaQuery("(min-width: 1080px)");
-    
-    const [ isDrawerOpen, setDrawerOpen ] = useState(false); 
-    const [ selectedFinancialYear, setSelectedFinancialYear ] = useState<FinancialYear | null>(null);
-    const [ activeHoldings, setActiveHoldings ] = useState([]);
-    const [ totalPnl, setTotalPnl ] = useState<number>(0);
-    const [ totalAmountInvested, setTotalAmountInvested ] = useState<number>(0);
+
+    const [isDataLoading, setDataLoading] = useState<boolean>(false);
+
+    const [isDrawerOpen, setDrawerOpen] = useState(false);
+    const [selectedFinancialYear, setSelectedFinancialYear] = useState<FinancialYear | null>(null);
+    const [activeHoldings, setActiveHoldings] = useState([]);
+    const [totalPnl, setTotalPnl] = useState<number>(0);
+    const [totalAmountInvested, setTotalAmountInvested] = useState<number>(0);
 
     const [exchangeRate, setExchangeRate] = useState<number>(0);
     const [annualOverviewData, setAnnualOverviewData] = useState<AnnualOverviewData>({
@@ -45,12 +48,14 @@ export default function Portfolio() {
             setExchangeRate(_exchangeRate.data);
         }
         getExchangeRate();
-    }, []);       
+    }, []);
 
     useEffect(() => {
         async function fetchData() {
 
             if (!selectedFinancialYear) return;
+
+            setDataLoading(true);
 
             const _FY = selectedFinancialYear?.year;
             const response = await fetch('/api/v2/holdings/annual?financialYear=' + _FY);
@@ -58,9 +63,10 @@ export default function Portfolio() {
             //Unable to fetch live price. Throw an error or use a different approach to handle this
             if (response.status !== 200) {
                 alert('Unable to fetch data. Please try again later');
+                setDataLoading(false);
                 return;
             }
-            
+
             const result = await response.json();
             result.absoluteReturnUSD = result.absoluteReturn * exchangeRate;
             result.amountInvestedUSD = result.amountInvested * exchangeRate;
@@ -71,6 +77,8 @@ export default function Portfolio() {
             setTotalAmountInvested(result.amountInvested);
 
             setAnnualOverviewData(result);
+
+            setDataLoading(false);
         }
 
         fetchData();
@@ -81,16 +89,16 @@ export default function Portfolio() {
             <Head>
                 <title>Portfolio</title>
             </Head>
-        
+
             <div className="overflow-hidden border rounded-lg shadow m-8">
                 <div className="border-b p-4">
-                    {isDesktop ? 
-                        <DesktopDrowpdown 
+                    {isDesktop ?
+                        <DesktopDrowpdown
                             selectedFinancialYear={selectedFinancialYear}
                             setSelectedFinancialYear={setSelectedFinancialYear}
                             isDrawerOpen={isDrawerOpen}
                             setDrawerOpen={setDrawerOpen}
-                        /> : 
+                        /> :
                         <MobileDropdown
                             selectedFinancialYear={selectedFinancialYear}
                             setSelectedFinancialYear={setSelectedFinancialYear}
@@ -109,28 +117,35 @@ export default function Portfolio() {
                             <TabsTrigger value="tax">Tax</TabsTrigger>
                         </TabsList>
 
-                        <OverviewTab 
-                            overview_data={annualOverviewData} 
-                            exchange_rate={exchangeRate}
-                            selected_financial_year={selectedFinancialYear}
-                        />
+                        {isDataLoading && <LoadingSpinner />}
 
-                        {selectedFinancialYear && ( isDesktop ?  
-                            <ActiveHoldingsTab 
-                                activeHoldings={activeHoldings} 
-                                selectedFinancialYear={selectedFinancialYear} 
-                            /> : 
+                        {!isDataLoading &&
+                            <OverviewTab
+                                overview_data={annualOverviewData}
+                                exchange_rate={exchangeRate}
+                                selected_financial_year={selectedFinancialYear}
+                            />
+                        }
+
+                        {selectedFinancialYear && (isDesktop ?
+                            <ActiveHoldingsTab
+                                activeHoldings={activeHoldings}
+                                selectedFinancialYear={selectedFinancialYear}
+                            /> :
                             <MobileActiveTab
                                 activeHoldings={activeHoldings}
                                 selectedFinancialYear={selectedFinancialYear}
                             />
                         )}
 
-                        <TabsContent value="dividends">  
-                        </TabsContent>
-                        <TabsContent value="tax">
+                        {!isDataLoading && <TabsContent value="dividends">
+                            <div>Dividends</div>
+                        </TabsContent>}
+
+                        {!isDataLoading && <TabsContent value="tax">
                             <div>Tax</div>
                         </TabsContent>
+                        }
                     </Tabs>
                 </div>
             </div>
