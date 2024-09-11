@@ -127,7 +127,7 @@ export default function Portfolio() {
                             />
                         }
 
-                        {selectedFinancialYear && (isDesktop ?
+                        {selectedFinancialYear && !isDataLoading && (isDesktop ?
                             <ActiveHoldingsTab
                                 activeHoldings={activeHoldings}
                                 selectedFinancialYear={selectedFinancialYear}
