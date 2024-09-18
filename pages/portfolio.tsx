@@ -1,24 +1,36 @@
-import { useEffect, useState } from "react";
+import { 
+    useEffect, 
+    useState,
+    useRef
+} from "react";
 import Head from 'next/head';
-
 import { useMediaQuery } from "@/hooks/use-media-query";
-
 import { DesktopDrowpdown } from "@/components/custom/DesktopDropdown";
 import { MobileDropdown } from "@/components/custom/MobileDropDown";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
+import { 
+    Tabs, 
+    TabsContent, 
+    TabsList, 
+    TabsTrigger 
+} from "@/components/ui/tabs";
 import { convertINRToUSD } from "@/utils/ConvertINRToUSD";
 import { AnnualOverviewData } from "@/types/AnnualOverviewData";
 import { FinancialYear } from "@/types/FinancialYear";
 import { OverviewTab } from "@/components/custom/tabs/OverviewTab";
-import { ActiveHoldingsTab, MobileActiveTab } from "@/components/custom/tabs/ActiveHoldingsTab";
+import { 
+    ActiveHoldingsTab, 
+    MobileActiveTab 
+} from "@/components/custom/tabs/ActiveHoldingsTab";
 import LoadingSpinner from "@/pages/components/loading-spinner";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 export default function Portfolio() {
 
     const isDesktop = useMediaQuery("(min-width: 1080px)");
 
     const [isDataLoading, setDataLoading] = useState<boolean>(false);
+    const [refreshData, setRefreshData] = useState<boolean>(false);
+    const prevRefreshData = useRef(refreshData); // Ref to store the previous value of refreshData
 
     const [isDrawerOpen, setDrawerOpen] = useState(false);
     const [selectedFinancialYear, setSelectedFinancialYear] = useState<FinancialYear | null>(null);
@@ -53,7 +65,9 @@ export default function Portfolio() {
     useEffect(() => {
         async function fetchData() {
 
-            if (!selectedFinancialYear) return;
+            if (!selectedFinancialYear) {
+                return;
+            }
 
             setDataLoading(true);
 
@@ -63,6 +77,7 @@ export default function Portfolio() {
             //Unable to fetch live price. Throw an error or use a different approach to handle this
             if (response.status !== 200) {
                 alert('Unable to fetch data. Please try again later');
+
                 setDataLoading(false);
                 return;
             }
@@ -82,7 +97,8 @@ export default function Portfolio() {
         }
 
         fetchData();
-    }, [selectedFinancialYear]);
+
+    }, [selectedFinancialYear, refreshData]);
 
     return (
         <>
@@ -91,7 +107,7 @@ export default function Portfolio() {
             </Head>
 
             <div className="overflow-hidden border rounded-lg shadow m-8">
-                <div className="border-b p-4">
+                <div className="flex items-center border-b p-4">
                     {isDesktop ?
                         <DesktopDrowpdown
                             selectedFinancialYear={selectedFinancialYear}
@@ -106,6 +122,14 @@ export default function Portfolio() {
                             setDrawerOpen={setDrawerOpen}
                         />
                     }
+                    {/*
+                        Animate this icon when the data is being fetched
+                     */}
+                    <ReloadIcon 
+                        className={`w-6 h-6 text-gray-500 cursor-pointer hover:text-black ${isDataLoading ? "animate-spin" : ""} ml-4`}
+                        fontSize={50}
+                        onClick={() => setRefreshData(!refreshData)}
+                    />
                 </div>
 
                 <div className="p-4">
